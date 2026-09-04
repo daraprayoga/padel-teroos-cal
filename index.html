@@ -303,7 +303,9 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
   padding:12px 22px calc(env(safe-area-inset-bottom) + 26px);
   transform:translateY(103%);transition:transform .24s cubic-bezier(.32,.72,0,1)}
 .sheet.on{transform:none}
-.grab{width:38px;height:4px;border-radius:2px;background:rgba(47,58,24,.18);margin:0 auto 16px;cursor:grab}
+.grab{width:44px;height:5px;border-radius:3px;background:rgba(47,58,24,.22);margin:0 auto 12px}
+.sheet-handle{padding:12px 0 4px;margin:-4px 0 0;cursor:grab;touch-action:none}
+.sheet-handle:active{cursor:grabbing}
 .sheet h2{font-size:26px;font-weight:700;letter-spacing:-.025em;margin:12px 0 6px;line-height:1.2}
 .gcal-link{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:8px 14px;border-radius:var(--r-pill);
   font-size:12.5px;font-weight:600;color:var(--matcha);background:var(--matcha-wash);border:1px solid rgba(82,102,39,.18);
@@ -469,7 +471,7 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
       <button class="act quiet" onclick="copySyncLink()">Salin link</button>
       <button class="act quiet" onclick="disconnectSync()">Matikan</button>
     </div>
-    <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.5">Pakai Firebase gratis. Admin aktifkan sekali, salin link ke member — semua otomatis dapat update.</p>
+    <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.5">Setelah sync aktif, member cukup buka <b>link polos</b> site ini (tanpa tambahan apapun). Update admin langsung ikut.</p>
     <details style="margin-top:8px;font-size:12px;color:var(--ink-mute);line-height:1.5">
       <summary style="cursor:pointer;font-weight:600;color:var(--ink-soft)">Cara buat Firebase (2 menit)</summary>
       <ol style="padding-left:18px;margin:8px 0">
@@ -477,7 +479,8 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
         <li>Build → Realtime Database → Create Database → Start in <b>test mode</b></li>
         <li>Copy URL (…firebasedatabase.app)</li>
         <li>Rules: pastikan .read dan .write true, Publish</li>
-        <li>Kembali ke sini → Aktifkan sync → tempel URL</li>
+        <li>Di sini → Aktifkan sync → tempel URL</li>
+        <li>Supaya <b>semua device</b> otomatis sync di link polos: isi variabel <code>EMBEDDED_CLOUD_DB</code> di kode dengan URL yang sama, lalu deploy ulang ke Vercel</li>
       </ol>
     </details>
     <div class="sec"><h2>Backup data</h2></div>
@@ -540,7 +543,7 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 </nav>
 
 <div class="scrim" id="scrim" onclick="closeSheet()"></div>
-<div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+<div class="sheet" id="sheet"><div class="sheet-handle" id="sheetHandle"><div class="grab"></div></div><div id="sheetBody"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -556,6 +559,8 @@ var store = (function(){
 
 /* ============ KONSTANTA ============ */
 var ADMIN_PIN = '7777';
+/* Firebase DB URL — isi supaya link polos sync untuk semua pengunjung */
+var EMBEDDED_CLOUD_DB = 'https://padelteroos-cal-default-rtdb.asia-southeast1.firebasedatabase.app';
 var TYPE = {mabar:'Latihan', sparing:'Sparing', turnamen:'Turnamen', battle:'Sparing'};
 var TYPE_ICON = {mabar:'i-ball', sparing:'i-users', turnamen:'i-trophy', battle:'i-users'};
 var COLORS = ['#526627','#6c8437','#3c4b1c','#7d8f4a','#455a1f','#b08a58','#3d6f70','#5f7330','#c9694a','#8a4326'];
@@ -630,40 +635,51 @@ var state = {
   editId:null,
   formType:'mabar',
   formPlayers:[],
-  pairEdit:null
+  pairEdit:null,
+  pairEditPending:false
 };
 /* Cloud sync via Firebase Realtime Database (free, CORS OK) */
-function getSyncConfig(){
+function resolveCloudDb(){
+  var fromStore = store.get('teroos_fb', null);
+  if(fromStore) return String(fromStore).replace(/\/$/,'');
+  if(typeof EMBEDDED_CLOUD_DB === 'string' && EMBEDDED_CLOUD_DB) return String(EMBEDDED_CLOUD_DB).replace(/\/$/,'');
+  // legacy query param (sekali jalan, lalu disimpan)
   try{
-    var q = new URLSearchParams(location.search).get('sync');
-    if(q){
-      // format: base64(json{id,db}) or plain id with saved db
-      try{
-        var decoded = JSON.parse(atob(q.replace(/-/g,'+').replace(/_/g,'/')));
-        if(decoded && decoded.id && decoded.db){
-          store.set('teroos_sync', decoded.id);
-          store.set('teroos_fb', decoded.db);
-          return {id: decoded.id, db: decoded.db};
+    var params = new URLSearchParams(location.search);
+    var s = params.get('s') || params.get('sync');
+    if(s){
+      if(s.length > 40 && s.indexOf('.') < 0){
+        try{
+          var decoded = JSON.parse(atob(s.replace(/-/g,'+').replace(/_/g,'/')));
+          if(decoded && decoded.db){
+            store.set('teroos_fb', decoded.db);
+            return String(decoded.db).replace(/\/$/,'');
+          }
+        }catch(e){}
+      }
+      var dot = s.indexOf('.');
+      if(dot > 0){
+        var host = s.slice(dot+1);
+        if(host){
+          var db = 'https://' + host + '.firebasedatabase.app';
+          store.set('teroos_fb', db);
+          return db;
         }
-      }catch(e){
-        store.set('teroos_sync', q);
       }
     }
   }catch(e){}
-  var id = store.get('teroos_sync', null);
-  var db = store.get('teroos_fb', null);
-  if(id && db) return {id:id, db:db};
   return null;
 }
+function getSyncConfig(){
+  var db = resolveCloudDb();
+  if(!db) return null;
+  return {id:'main', db:db};
+}
 function getSyncId(){
-  var c = getSyncConfig();
-  return c ? c.id : null;
+  return getSyncConfig() ? 'main' : null;
 }
 function syncShareUrl(){
-  var c = getSyncConfig();
-  if(!c) return location.href.split('?')[0];
-  var payload = btoa(JSON.stringify({id:c.id, db:c.db})).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  return location.href.split('?')[0] + '?sync=' + payload;
+  return location.href.split('?')[0].split('#')[0];
 }
 function fbUrl(c){
   var base = c.db.replace(/\/$/,'');
@@ -707,35 +723,30 @@ function cloudPull(){
 }
 function enableCloudSync(){
   if(!state.admin){ toast('Cuma admin yang bisa aktifkan sync'); return; }
-  var existing = store.get('teroos_fb', '');
+  var existing = store.get('teroos_fb', '') || EMBEDDED_CLOUD_DB || '';
   var db = prompt(
-    'Tempel Firebase Realtime Database URL.\\n\\nContoh:\\nhttps://nama-project-default-rtdb.asia-southeast1.firebasedatabase.app\\n\\n(Buat gratis di console.firebase.google.com — lihat panduan di bawah)',
+    'Tempel Firebase Realtime Database URL.\n\nContoh:\nhttps://nama-project-default-rtdb.asia-southeast1.firebasedatabase.app\n\nSetelah ini, link polos site ini yang dipakai member (tanpa buntut).',
     existing || ''
   );
   if(db===null) return;
   db = (db||'').trim().replace(/\/$/,'');
   if(!db || db.indexOf('http')!==0){ toast('URL Firebase tidak valid'); return; }
-  // quick rules check
-  var id = store.get('teroos_sync', null) || ('c' + Math.random().toString(36).slice(2,10));
   store.set('teroos_fb', db);
-  store.set('teroos_sync', id);
+  store.set('teroos_sync', 'main');
   toast('Menyimpan ke cloud…');
   var payload = {
     events: state.events,
     roster: state.roster || [],
     updatedAt: new Date().toISOString()
   };
-  fetch(fbUrl({id:id, db:db}), {
+  fetch(fbUrl({id:'main', db:db}), {
     method:'PUT',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify(payload)
   }).then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
-    var url = syncShareUrl();
-    try{ history.replaceState(null,'',url); }catch(e){}
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(url).then(function(){ toast('Sync aktif · link disalin'); }).catch(function(){ toast('Sync aktif'); });
-    } else toast('Sync aktif');
+    try{ history.replaceState(null,'', syncShareUrl()); }catch(e){}
+    toast('Sync aktif · link polos siap dipakai member');
     renderClub();
   }).catch(function(err){
     console.warn(err);
@@ -746,7 +757,7 @@ function copySyncLink(){
   if(!getSyncConfig()){ toast('Belum aktifkan sync'); return; }
   var url = syncShareUrl();
   if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(function(){ toast('Link sync disalin'); });
+    navigator.clipboard.writeText(url).then(function(){ toast('Link polos disalin'); });
   } else prompt('Salin link ini:', url);
 }
 function disconnectSync(){
@@ -1190,6 +1201,10 @@ function renderLineup(){
   }).join('');
   setTimeout(function(){ scrollLinePill(state.lineupId); }, 40);
   renderLineBody();
+  if(state.pairEditPending){
+    state.pairEditPending = false;
+    startPairEdit();
+  }
 }
 function renderLineBody(){
   var ev=byId(state.lineupId);
@@ -1307,7 +1322,7 @@ function renderClub(){
   var st = document.getElementById('syncStatus');
   if(st){
     st.textContent = cfg
-      ? 'Sync aktif ('+cfg.id+'). Bagikan link sync ke member.'
+      ? 'Sync aktif. Member cukup buka link polos site ini.'
       : 'Belum sync. Data masih per-device. Admin aktifkan sync (Firebase gratis).';
   }
   applyAccess();
@@ -1331,9 +1346,12 @@ function closeSheet(){
 }
 function initSheetDrag(){
   var sheet = document.getElementById('sheet');
-  var grab = sheet.querySelector('.grab');
+  var handle = document.getElementById('sheetHandle') || sheet.querySelector('.sheet-handle') || sheet.querySelector('.grab');
   function onStart(e){
-    if(sheet.scrollTop > 4) return;
+    // allow drag from handle always; from body only if scrolled to top
+    var t = e.target;
+    var fromHandle = handle && (t===handle || handle.contains(t));
+    if(!fromHandle && sheet.scrollTop > 2) return;
     sheetDrag.dragging = true;
     sheetDrag.startY = (e.touches ? e.touches[0].clientY : e.clientY);
     sheetDrag.currentY = 0;
@@ -1350,18 +1368,24 @@ function initSheetDrag(){
   function onEnd(){
     if(!sheetDrag.dragging) return;
     sheetDrag.dragging = false;
-    sheet.style.transition = 'transform .24s cubic-bezier(.32,.72,0,1)';
-    if(sheetDrag.currentY > 110){
+    sheet.style.transition = 'transform .22s cubic-bezier(.32,.72,0,1)';
+    if(sheetDrag.currentY > 90){
       closeSheet();
     } else {
       sheet.style.transform = 'translateY(0)';
-      setTimeout(function(){ sheet.style.transition = ''; sheet.style.transform = ''; }, 260);
+      setTimeout(function(){ sheet.style.transition = ''; sheet.style.transform = ''; }, 240);
     }
   }
-  grab.addEventListener('touchstart', onStart, {passive:true});
-  grab.addEventListener('touchmove', onMove, {passive:false});
-  grab.addEventListener('touchend', onEnd);
-  grab.addEventListener('mousedown', onStart);
+  // Prefer large handle zone
+  var targets = [handle, sheet];
+  targets.forEach(function(el){
+    if(!el) return;
+    el.addEventListener('touchstart', onStart, {passive:true});
+    el.addEventListener('touchmove', onMove, {passive:false});
+    el.addEventListener('touchend', onEnd);
+    el.addEventListener('touchcancel', onEnd);
+  });
+  handle && handle.addEventListener('mousedown', onStart);
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onEnd);
 }
@@ -1429,10 +1453,13 @@ function openDetail(id){
         lineup += '<div class="lbl" style="margin-top:10px">Belum ada pair</div><div class="chips">'+
           np.unpaired.map(function(p){ return '<span class="chip">'+ava(p)+p+'</span>'; }).join('')+'</div>';
       }
+      if(state.admin){
+        lineup += '<button class="act" style="margin-top:12px" onclick="closeSheet();state.lineupId=\''+e.id+'\';state.pairEditPending=true;go(\'lineup\')">'+ic('i-users')+'Ubah pasangan</button>';
+      }
     } else {
       lineup = state.admin
         ? '<div class="note">'+ic('i-info')+'<span>Belum ada pasangan.</span></div>'+
-          '<button class="act" style="margin-top:10px" onclick="closeSheet();state.lineupId=\''+e.id+'\';go(\'lineup\');startPairEdit()">'+ic('i-users')+'Susun pasangan</button>'
+          '<button class="act" style="margin-top:10px" onclick="closeSheet();state.lineupId=\''+e.id+'\';state.pairEditPending=true;go(\'lineup\')">'+ic('i-users')+'Susun pasangan</button>'
         : '<div class="note">'+ic('i-info')+'<span>Pasangan belum disusun buat sesi ini.</span></div>';
     }
     var capN=cap(e);
@@ -1674,6 +1701,12 @@ applyAccess();
 ensureRoster();
 cloudPull().then(function(ok){
   if(ok) ensureRoster();
+  // rapikan URL jadi link polos
+  try{
+    if(getSyncConfig() && (location.search.indexOf('s=')>=0 || location.search.indexOf('sync=')>=0)){
+      history.replaceState(null,'', syncShareUrl());
+    }
+  }catch(e){}
   renderHome();
   renderJadwal();
   if(ok) toast('Data cloud dimuat');
