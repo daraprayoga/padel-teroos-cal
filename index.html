@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#f3f1e7">
+<title>padel.teroos · Jadwal Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --matcha:#526627;
+  --matcha-deep:#2f3a18;
+  --matcha-mid:#6c8437;
+  --matcha-soft:#a8bd7a;
+  --matcha-wash:#e7edd8;
+  --sand:#7d8f4a;
+  --sand-wash:#eef1e0;
+  --teal:#2f3a18;
+  --teal-wash:#e6e9d8;
+  --coral:#96a869;
+  --coral-wash:#eef2df;
+  --ink:#20241a;
+  --ink-soft:#5c6551;
+  --ink-mute:#8d9482;
+  --line:rgba(47,58,24,.10);
+  --card:rgba(255,255,255,.78);
+
+  --r-sm:14px; --r-md:20px; --r-lg:26px; --r-xl:32px; --r-pill:999px;
+  --pad:20px;
+  --sh:0 2px 6px rgba(47,58,24,.04), 0 14px 30px rgba(47,58,24,.07);
+  --sh-dark:0 16px 36px rgba(32,36,26,.3);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%}
+body{font-family:'Bricolage Grotesque',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+  color:var(--ink);background:#f2f1e6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font-family:inherit;color:inherit;border:none;background:none;padding:0;cursor:pointer}
+input,textarea{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--matcha);outline-offset:2px}
+
+/* ===== BACKGROUND GRADIENT ===== */
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;
+  background:linear-gradient(165deg,#f7f3e7 0%,#f1f0e2 35%,#e7ecd8 68%,#dde6c9 100%)}
+.blob{position:absolute;border-radius:50%;filter:blur(64px)}
+.b1{width:380px;height:380px;left:-110px;top:-110px;background:radial-gradient(circle,#f2e3d0 0%,rgba(242,227,208,0) 70%);opacity:.95}
+.b2{width:400px;height:400px;right:-150px;top:60px;background:radial-gradient(circle,#dfe8c0 0%,rgba(223,232,192,0) 70%);opacity:.9}
+.b3{width:500px;height:500px;left:-160px;bottom:-200px;background:radial-gradient(circle,#c9dca3 0%,rgba(201,220,163,0) 70%);opacity:.85}
+.b4{width:320px;height:320px;right:-90px;bottom:-40px;background:radial-gradient(circle,#eee0c6 0%,rgba(238,224,198,0) 70%);opacity:.9}
+
+#app{max-width:460px;margin:0 auto;min-height:100vh;position:relative;padding:0 var(--pad) 130px}
+.screen{display:none}
+.screen.active{display:block;animation:in .19s ease-out both}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fade-swap{animation:in .15s ease-out both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== TOP BAR ===== */
+.topbar{display:flex;align-items:center;gap:11px;padding:calc(env(safe-area-inset-top) + 20px) 0 16px}
+.logo{flex:none;display:flex;align-items:center;height:28px}
+.logo img{height:22px;width:auto;display:block}
+.who{flex:1;min-width:0;line-height:1.25;display:flex;align-items:center;gap:8px}
+.who .mode{font-size:13px;color:var(--ink-mute);font-weight:500}
+.who .nav-text{font-size:13px;font-weight:600;color:var(--matcha-deep);background:none;border:none;padding:0;cursor:pointer}
+.who .nav-text:active{opacity:.7}
+.who .mode-sep{font-size:13px;color:var(--ink-mute);opacity:.5}
+.rbtn{width:44px;height:44px;border-radius:var(--r-pill);flex:none;display:grid;place-items:center;
+  background:rgba(255,255,255,.8);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.85);box-shadow:var(--sh);transition:box-shadow .14s}
+.rbtn:active{box-shadow:inset 0 2px 7px rgba(47,58,24,.18)}
+.rbtn svg{width:20px;height:20px}
+.rbtn.dark{background:#2b3417;color:#fff;border-color:rgba(255,255,255,.14)}
+.rbtn.admin{background:var(--matcha-wash);border-color:rgba(82,102,39,.3);color:var(--matcha)}
+
+/* ===== HEADLINE ===== */
+h1.head{font-size:38px;line-height:1.06;font-weight:700;letter-spacing:-.03em;margin:8px 0 22px;color:#242d16}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:26px 0 13px}
+.sec h2{margin:0;font-size:17.5px;font-weight:700;letter-spacing:-.02em}
+.sec button{font-size:13px;font-weight:600;color:var(--matcha)}
+.sec .muted{font-size:12.5px;color:var(--ink-mute);font-weight:500}
+
+/* ===== STAT CARD ===== */
+.stat{background:linear-gradient(150deg,#404e22 0%,#252d14 100%);border-radius:var(--r-xl);padding:22px 22px 20px;
+  color:#f1f0e2;box-shadow:var(--sh-dark);position:relative;overflow:hidden}
+.stat::after{content:'';position:absolute;inset:0;border-radius:var(--r-xl);
+  background:radial-gradient(120% 90% at 88% 8%,rgba(168,189,122,.22) 0%,rgba(168,189,122,0) 60%);pointer-events:none}
+.stat-main{position:relative;z-index:1}
+.stat-big{display:flex;align-items:baseline;gap:10px;margin-bottom:16px}
+.stat-big b{font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.stat-big span{font-size:15px;font-weight:600;opacity:.75}
+.stat-months{display:flex;flex-wrap:wrap;gap:8px}
+.mchip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:var(--r-pill);
+  background:rgba(241,240,226,.1);font-size:12.5px;font-weight:600}
+.mchip b{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+.mchip span{opacity:.7;font-weight:500}
+
+/* ===== PILLS ===== */
+.pills{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;
+  margin:0 calc(var(--pad) * -1);padding:3px var(--pad) 5px}
+.pills::-webkit-scrollbar{display:none}
+.pill{flex:none;display:flex;align-items:center;gap:8px;padding:10px 17px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh);
+  font-size:13.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;
+  transition:background-color .16s ease,color .16s ease,box-shadow .16s ease,border-color .16s ease}
+.pill:active{box-shadow:inset 0 2px 6px rgba(47,58,24,.14)}
+.pill svg{width:16px;height:16px;color:var(--ink-mute)}
+.pill.count{padding:8px 17px 8px 8px}
+.pill .n{width:28px;height:28px;border-radius:var(--r-pill);display:grid;place-items:center;flex:none;
+  background:var(--matcha-wash);color:var(--matcha-deep);font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;
+  transition:background-color .16s ease,color .16s ease}
+.pill.on{background:#2b3417;border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(47,58,24,.22)}
+.pill.on svg{color:var(--matcha-soft)}
+.pill.on .n{background:rgba(255,255,255,.16);color:#fff}
+
+/* ===== DAY STRIP ===== */
+.days{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+  margin:0 calc(var(--pad) * -1);padding:4px var(--pad) 6px}
+.days::-webkit-scrollbar{display:none}
+.dchip{flex:none;width:56px;padding:11px 0 9px;border-radius:22px;text-align:center;
+  background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh);
+  transition:background-color .16s ease,box-shadow .16s ease}
+.dchip .dn{font-size:11.5px;font-weight:600;color:var(--ink-mute);display:block;margin-bottom:7px}
+.dchip .num{width:34px;height:34px;margin:0 auto;border-radius:var(--r-pill);display:grid;place-items:center;
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;transition:background-color .16s ease,color .16s ease}
+.dchip .mk{display:flex;gap:3px;justify-content:center;height:5px;margin-top:5px}
+.dchip .mk i{width:4px;height:4px;border-radius:50%;background:var(--matcha)}
+.dchip .mk i.sparing{background:var(--sand)}
+.dchip .mk i.turnamen{background:var(--teal)}
+.dchip.on{background:rgba(255,255,255,.95)}
+.dchip.on .num{background:#2b3417;color:#fff}
+.dchip.now .dn{color:var(--matcha)}
+
+/* ===== CARD ===== */
+.card{width:100%;text-align:left;display:block;position:relative;margin-bottom:12px;padding:17px 18px;
+  background:var(--card);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+  border:1px solid rgba(255,255,255,.9);border-radius:var(--r-lg);box-shadow:var(--sh);transition:box-shadow .14s}
+.card:active{box-shadow:inset 0 2px 8px rgba(47,58,24,.1)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--r-pill);
+  font-size:11.5px;font-weight:700;background:var(--matcha-wash);color:#3f5019}
+.badge i{width:6px;height:6px;border-radius:50%;background:var(--matcha)}
+.badge.sparing{background:var(--sand-wash);color:#3f4e22}.badge.sparing i{background:var(--sand)}
+.badge.turnamen{background:var(--teal-wash);color:#28320f}.badge.turnamen i{background:var(--teal)}
+.badge.battle{background:var(--coral-wash);color:#4c5c2e}.badge.battle i{background:var(--coral)}
+.card h3{margin:11px 0 0;font-size:17.5px;font-weight:700;letter-spacing:-.02em;line-height:1.25;padding-right:46px}
+.card p{margin:7px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-mute);padding-right:20px}
+.line{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12.5px;color:var(--ink-soft)}
+.line svg{width:14px;height:14px;color:var(--ink-mute);flex:none}
+.open{position:absolute;top:15px;right:15px;width:36px;height:36px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.9);border:1px solid var(--line);display:grid;place-items:center}
+.open svg{width:16px;height:16px;color:#2b3417}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px}
+.stack{display:flex;align-items:center}
+.stack .a{width:30px;height:30px;border-radius:var(--r-pill);display:grid;place-items:center;flex:none;
+  font-size:10.5px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,.95);margin-left:-9px}
+.stack .a:first-child{margin-left:0}
+.stack .more{background:#2b3417}
+.act{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:var(--r-pill);
+  font-size:12.5px;font-weight:600;color:#fff;background:var(--matcha);box-shadow:0 6px 14px rgba(82,102,39,.26)}
+.act.sparing{background:var(--sand);box-shadow:0 6px 14px rgba(125,143,74,.28)}
+.act.turnamen{background:var(--teal);box-shadow:0 6px 14px rgba(47,58,24,.3)}
+.act.battle{background:var(--coral);box-shadow:0 6px 14px rgba(150,168,105,.3)}
+.act.quiet{background:rgba(255,255,255,.9);color:var(--ink-soft);border:1px solid var(--line);box-shadow:none}
+.act svg{width:14px;height:14px}
+a.act{text-decoration:none}
+.card p.sub{margin:3px 0 0;font-size:12.5px;color:var(--ink-mute);font-style:italic;padding-right:44px}
+
+/* ===== TIMELINE ===== */
+.part{display:flex;align-items:center;justify-content:space-between;margin:22px 0 11px}
+.part b{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink-soft)}
+.part b svg{width:16px;height:16px;color:var(--matcha)}
+.part span{font-size:12px;color:var(--ink-mute)}
+.tl{display:flex;gap:11px}
+.tl-t{width:52px;flex:none;padding-top:15px;text-align:right}
+.tl-t b{display:block;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;line-height:1.1}
+.tl-t span{font-size:10.5px;color:var(--ink-mute)}
+.tl-r{width:10px;flex:none;display:flex;flex-direction:column;align-items:center;padding-top:19px}
+.tl-r .k{width:9px;height:9px;border-radius:50%;background:var(--matcha);box-shadow:0 0 0 3.5px rgba(82,102,39,.14)}
+.tl-r .l{width:1.5px;flex:1;background:linear-gradient(180deg,var(--line),rgba(47,58,24,.02));margin:6px 0}
+.tl-b{flex:1;min-width:0}
+
+/* ===== MONTH GRID ===== */
+.cal{background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.9);border-radius:var(--r-xl);padding:16px 14px 12px;box-shadow:var(--sh);margin-top:12px}
+.calh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.calh b{font-size:15.5px;font-weight:700}
+.calh div{display:flex;gap:8px}
+.calh button{width:32px;height:32px;border-radius:var(--r-pill);background:rgba(255,255,255,.85);
+  border:1px solid var(--line);display:grid;place-items:center}
+.calh svg{width:14px;height:14px;color:#2b3417}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.dow{text-align:center;font-size:10.5px;font-weight:600;color:var(--ink-mute);padding-bottom:6px}
+.cell{aspect-ratio:1;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;transition:background-color .16s ease,color .16s ease}
+.cell.mute{color:var(--ink-mute);opacity:.4}
+.cell.now{color:var(--matcha);font-weight:700}
+.cell.on{background:#2b3417;color:#fff}
+.cell .mk{display:flex;gap:2.5px;height:5px}
+.cell .mk i{width:4px;height:4px;border-radius:50%;background:var(--matcha)}
+.cell .mk i.sparing{background:var(--sand)}
+.cell .mk i.turnamen{background:var(--teal)}
+.cell.on .mk i{background:var(--matcha-soft)}
+
+/* ===== LINEUP ===== */
+.court{background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.9);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:var(--sh)}
+.courth{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.courth b{font-size:14px;font-weight:700}
+.courth span{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-mute)}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:9px;align-items:center}
+.pair{background:rgba(255,255,255,.65);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 10px}
+.pair .p{display:flex;align-items:center;gap:8px}
+.pair .p + .p{margin-top:8px}
+.pair .a{width:26px;height:26px;border-radius:var(--r-pill);display:grid;place-items:center;color:#fff;font-size:9.5px;font-weight:700;flex:none}
+.pair em{font-style:normal;font-size:13px;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vsm{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:var(--matcha);opacity:.75}
+.pair-edit .hint{font-size:13px;color:var(--ink-mute);margin:0 0 12px;line-height:1.4}
+.pair-edit .pool{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.pair-edit .pool .chip{cursor:pointer}
+.pair-edit .pool .chip.sel{outline:2px solid var(--matcha);outline-offset:1px;background:var(--matcha-wash)}
+.pair-edit .formed{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.pair-edit .formed .fp{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r-md);
+  background:var(--card);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh)}
+.pair-edit .formed .fp b{flex:1;font-size:13.5px;font-weight:600}
+.pair-edit .formed .fp .xbtn{width:28px;height:28px;min-width:28px;min-height:28px;flex:none;
+  border-radius:var(--r-pill);display:grid;place-items:center;
+  background:rgba(0,0,0,.06);border:none;cursor:pointer;padding:0;color:var(--ink-mute)}
+.pair-edit .formed .fp .xbtn svg{width:14px;height:14px;display:block}
+.pair-edit .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pair-edit .actions .act{flex:1;min-width:120px;justify-content:center}
+
+/* ===== CHIPS ===== */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:7px 13px 7px 7px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.85);border:1px solid var(--line);font-size:12.5px;font-weight:600;
+  transition:background-color .14s ease,border-color .14s ease}
+.chip .a{width:22px;height:22px;border-radius:var(--r-pill);display:grid;place-items:center;color:#fff;font-size:9px;font-weight:700;flex:none}
+.chip.off{padding:8px 14px;color:var(--ink-mute);border-style:dashed;background:rgba(255,255,255,.5)}
+.chip .x{display:grid;place-items:center;color:var(--ink-mute)}
+.chip .x svg{width:12px;height:12px}
+.chip svg.lead{width:14px;height:14px;color:var(--matcha)}
+.chip svg{width:13px;height:13px;color:var(--matcha);flex:none}
+.chip.pend{background:rgba(255,255,255,.45);border-style:dashed;color:var(--ink-mute)}
+.chip.pend svg{color:var(--ink-mute)}
+.confirmed-summary{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--matcha);margin:0 0 10px}
+.confirmed-summary svg{width:14px;height:14px;color:var(--matcha)}
+.backup-row{display:flex;gap:10px;flex-wrap:wrap}
+.backup-row .act{flex:1;min-width:120px;justify-content:center}
+.duo{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.duo .amp{font-size:12px;color:var(--ink-mute);font-style:italic;font-weight:500}
+.pchip{display:inline-flex;align-items:center;gap:7px;padding:6px 11px 6px 6px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.85);border:1px solid var(--line);font-size:12.5px;font-weight:600}
+.pchip em{font-style:normal}
+.pchip svg{color:var(--matcha)}
+.pchip.pend{background:rgba(255,255,255,.45);border-style:dashed;color:var(--ink-mute)}
+.pchip.pend svg{color:var(--ink-mute)}
+.a.tbc{background:transparent!important;border:1.5px dashed var(--ink-mute)!important;color:var(--ink-mute)}
+
+/* ===== FORM ===== */
+.lbl{font-size:13px;font-weight:600;color:var(--ink-soft);margin:20px 0 8px}
+.field{width:100%;padding:16px;font-size:15px;border-radius:var(--r-md);outline:none;
+  background:rgba(255,255,255,.9);border:1.5px solid rgba(255,255,255,.95);box-shadow:var(--sh);transition:border-color .14s}
+.field::placeholder{color:var(--ink-mute)}
+.field:focus,.field:focus-within{border-color:rgba(82,102,39,.45)}
+textarea.field{min-height:92px;resize:none;line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ico{display:flex;align-items:center;gap:10px}
+.ico svg{width:17px;height:17px;color:var(--matcha);flex:none}
+.ico input{border:none;background:none;outline:none;font-size:14.5px;font-weight:500;width:100%;min-width:0}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.seg button{padding:15px 6px;border-radius:var(--r-md);font-size:13.5px;font-weight:700;
+  background:rgba(255,255,255,.72);border:1.5px solid transparent;color:var(--ink-mute);
+  transition:background-color .14s ease,border-color .14s ease,color .14s ease}
+.seg button[data-t=mabar].on{background:var(--matcha-wash);border-color:var(--matcha);color:#3f5019}
+.seg button[data-t=sparing].on{background:var(--sand-wash);border-color:var(--sand);color:#3f4e22}
+.seg button[data-t=turnamen].on{background:var(--teal-wash);border-color:var(--teal);color:#28320f}
+.cta{width:100%;padding:19px;border-radius:var(--r-pill);background:#2b3417;color:#fff;font-size:16px;
+  font-weight:700;letter-spacing:-.01em;margin-top:26px;box-shadow:var(--sh-dark);transition:box-shadow .14s}
+.cta:active{box-shadow:inset 0 3px 10px rgba(0,0,0,.34)}
+.cta.ghost{background:rgba(255,255,255,.9);color:#2b3417;border:1px solid var(--line);box-shadow:none}
+.formtop{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 20px) 0 4px}
+.formtop b{font-size:17px;font-weight:700}
+
+/* ===== EMPTY / NOTE ===== */
+.empty{text-align:center;padding:36px 22px;color:var(--ink-mute)}
+.empty svg{width:32px;height:32px;color:var(--matcha-soft);margin-bottom:12px}
+.empty b{display:block;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.empty p{margin:0 0 16px;font-size:13px;line-height:1.5}
+.note{display:flex;gap:10px;align-items:flex-start;padding:13px 15px;border-radius:var(--r-md);
+  background:rgba(255,255,255,.6);border:1px solid var(--line);font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+.note svg{width:16px;height:16px;color:var(--matcha);flex:none;margin-top:1px}
+
+/* ===== SHEET ===== */
+.scrim{position:fixed;inset:0;z-index:900;background:rgba(32,36,26,.42);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .19s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:901;max-width:460px;margin:0 auto;max-height:88vh;overflow-y:auto;
+  background:rgba(249,247,238,.95);backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
+  border-top:1px solid rgba(255,255,255,.95);border-radius:var(--r-xl) var(--r-xl) 0 0;
+  padding:12px 22px calc(env(safe-area-inset-bottom) + 26px);
+  transform:translateY(103%);transition:transform .24s cubic-bezier(.32,.72,0,1)}
+.sheet.on{transform:none}
+.grab{width:38px;height:4px;border-radius:2px;background:rgba(47,58,24,.18);margin:0 auto 16px;cursor:grab}
+.sheet h2{font-size:26px;font-weight:700;letter-spacing:-.025em;margin:12px 0 6px;line-height:1.2}
+.gcal-link{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:8px 14px;border-radius:var(--r-pill);
+  font-size:12.5px;font-weight:600;color:var(--matcha);background:var(--matcha-wash);border:1px solid rgba(82,102,39,.18);
+  text-decoration:none;transition:background .14s}
+.gcal-link:active{background:var(--matcha-soft)}
+.gcal-link svg{width:14px;height:14px}
+.pin{width:100%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:26px;letter-spacing:.42em;
+  padding:18px 0 18px 12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(env(safe-area-inset-bottom) + 96px);
+  z-index:950;background:#2b3417;color:#f1f0e2;font-size:13.5px;font-weight:600;padding:13px 20px;border-radius:var(--r-pill);
+  box-shadow:var(--sh-dark);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+/* ===== TABBAR ===== */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 16px);z-index:800;
+  display:flex;gap:4px;padding:8px;width:min(420px,calc(100% - 32px));border-radius:var(--r-pill);
+  background:rgba(249,247,238,.85);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 32px rgba(47,58,24,.15)}
+.tabbar.hide{display:none}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;border-radius:var(--r-pill);
+  font-size:10.5px;font-weight:600;color:var(--ink-mute);transition:background-color .16s ease,color .16s ease}
+.tab svg{width:20px;height:20px}
+.tab.on{background:#2b3417;color:#fff}
+
+/* ===== CLUB ===== */
+.hero{display:flex;align-items:center;gap:15px;padding:20px;border-radius:var(--r-xl);
+  background:var(--card);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh);position:relative;overflow:hidden}
+.hero .mark{width:52px;height:52px;flex:none;border-radius:14px;overflow:hidden;background:var(--matcha-wash);
+  display:grid;place-items:center}
+.hero .mark img{width:36px;height:36px;object-fit:contain;display:block}
+.hero b{display:block;font-size:19px;font-weight:700;letter-spacing:-.02em}
+.hero span{font-size:13px;color:var(--ink-mute)}
+.add-player{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.add-player .field{width:100%;box-sizing:border-box}
+.add-player .act{align-self:flex-start;padding:11px 20px;font-size:13.5px;font-weight:600;
+  background:#2b3417;color:#fff;border:none;border-radius:var(--r-pill);cursor:pointer}
+.add-player .act:active{opacity:.85}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:11px}
+.kpi div{padding:16px 10px;text-align:center;border-radius:var(--r-md);
+  background:var(--card);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh)}
+.kpi b{display:block;font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:700;color:#3f5019}
+.kpi span{font-size:11px;color:var(--ink-mute)}
+.row{display:flex;align-items:center;gap:13px;padding:15px 16px;margin-bottom:9px;border-radius:var(--r-md);
+  background:var(--card);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh)}
+.row svg{width:18px;height:18px;color:var(--matcha);flex:none}
+.row b{flex:1;font-size:14px;font-weight:600}
+.row span{font-size:12.5px;color:var(--ink-mute)}
+</style>
+</head>
+<body>
+
+<div class="bg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="blob b4"></i></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-fwd" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 24 24"><path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.2V12l3.2 2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M19.5 10c0 5.5-7.5 11.5-7.5 11.5S4.5 15.5 4.5 10a7.5 7.5 0 1 1 15 0Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.2" y="5" width="17.6" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.2 10h17.6M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v7.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.8 20.5V14.5h4.4v6" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 20a6 6 0 0 1 12 0M16.4 5.4a3.3 3.3 0 0 1 0 5.9M17.8 14.6a5.7 5.7 0 0 1 3.2 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.6 20a7.4 7.4 0 0 1 14.8 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16.5 4.5H21v4.5M21 4.5l-7 7M16.5 19.5H21V15M21 19.5l-7-7M3 4.5l5 5M3 19.5l6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.6 6.2c2.6 2.9 2.6 8.7 0 11.6M18.4 6.2c-2.6 2.9-2.6 8.7 0 11.6" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7.5 4h9v5a4.5 4.5 0 0 1-9 0Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 6h-3v1.6a3 3 0 0 0 3 3M16.5 6h3v1.6a3 3 0 0 1-3 3M12 13.6V17M9 20h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-unlock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.2A8.4 8.4 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v5.2M12 7.9v.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 6.5V4.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7M6.5 6.5l.9 12.2a2 2 0 0 0 2 1.8h5.2a2 2 0 0 0 2-1.8l.9-12.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 5 14h5.5L9.5 22l9-13H13l1-7Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.2 4.2 0 0 0 6 0l3-3a4.2 4.2 0 0 0-6-6l-1.5 1.5M14 10a4.2 4.2 0 0 0-6 0l-3 3a4.2 4.2 0 0 0 6 6l1.5-1.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs></svg>
+
+<main id="app">
+  <!-- HOME -->
+  <section id="s-home" class="screen active">
+    <div class="topbar">
+      <div class="logo"><img src="data:image/png;base64,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" alt="padel.teroos"></div>
+      <div class="who">
+        <button class="nav-text" onclick="go('jadwal')">Calendar</button>
+        <span class="mode-sep">·</span>
+        <span class="mode" id="modeLine">Mode member</span>
+      </div>
+      <button class="rbtn" id="lockBtn" onclick="toggleAdmin()" aria-label="Akses admin"><svg><use href="#i-lock"/></svg></button>
+      <button class="rbtn dark adminOnly" onclick="openAdd()" aria-label="Tambah jadwal"><svg><use href="#i-plus"/></svg></button>
+    </div>
+    <div class="sec"><h2>Sesi terdekat</h2><button onclick="go('jadwal')">Buka kalender</button></div>
+    <div class="pills" id="homeFilters"></div>
+    <div id="homeList" style="margin-top:14px"></div>
+  </section>
+
+  <!-- JADWAL -->
+  <section id="s-jadwal" class="screen">
+    <div class="topbar">
+      <button class="rbtn" onclick="go('home')" aria-label="Kembali"><svg><use href="#i-back"/></svg></button>
+      <div class="who" style="text-align:center"><b id="stripLabel">April 2026</b><span>Kalender club</span></div>
+      <button class="rbtn" id="viewBtn" onclick="toggleCalView()" aria-label="Tampilan bulan"><svg><use href="#i-grid"/></svg></button>
+      <button class="rbtn dark adminOnly" onclick="openAdd()" aria-label="Tambah jadwal"><svg><use href="#i-plus"/></svg></button>
+    </div>
+    <h1 class="head" style="font-size:34px;margin-bottom:16px">Tanggal berapa<br>ada apa</h1>
+    <div class="days" id="dayStrip"></div>
+    <div class="cal" id="monthCal" style="display:none">
+      <div class="calh">
+        <b id="calMonth">April 2026</b>
+        <div>
+          <button onclick="shiftMonth(-1)" aria-label="Bulan sebelumnya"><svg><use href="#i-back"/></svg></button>
+          <button onclick="shiftMonth(1)" aria-label="Bulan berikutnya"><svg><use href="#i-fwd"/></svg></button>
+        </div>
+      </div>
+      <div class="grid" id="calGrid"></div>
+    </div>
+    <div class="pills" id="calFilters" style="margin-top:16px"></div>
+    <div id="agenda" style="margin-top:6px"></div>
+  </section>
+
+  <!-- LINEUP -->
+  <section id="s-lineup" class="screen">
+    <div class="topbar">
+      <button class="rbtn" onclick="go('jadwal')" aria-label="Kembali"><svg><use href="#i-back"/></svg></button>
+      <div class="who" style="text-align:center"><b>Line up</b><span id="lineSub">Pilih sesi</span></div>
+      <button class="rbtn adminOnly" onclick="shufflePairs()" aria-label="Acak pasangan"><svg><use href="#i-shuffle"/></svg></button>
+    </div>
+    <div class="pills" id="linePicker"></div>
+    <div id="lineBody" style="margin-top:18px"></div>
+  </section>
+
+  <!-- CLUB -->
+  <section id="s-club" class="screen">
+    <div class="topbar">
+      <div class="who"><b>Tentang club</b><span>Bekasi · main tiap Rabu &amp; Sabtu</span></div>
+      <button class="rbtn" id="lockBtn2" onclick="toggleAdmin()" aria-label="Akses admin"><svg><use href="#i-lock"/></svg></button>
+    </div>
+    <div class="hero">
+      <div class="mark"><img src="data:image/png;base64,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" alt="padel.teroos"></div>
+      <div><b>padel.teroos</b><span id="clubSub">12 anggota aktif</span></div>
+    </div>
+    <div class="kpi">
+      <div><b id="pSesi">0</b><span>Sesi total</span></div>
+      <div><b id="pAnggota">0</b><span>Anggota</span></div>
+      <div><b id="pCourt">0</b><span>Court dibooking</span></div>
+    </div>
+    <div class="sec"><h2>Anggota</h2><span class="muted" id="rosterCount"></span></div>
+    <div class="chips" id="roster"></div>
+    <div class="add-player adminOnly">
+      <input class="field" id="clubNewPlayer" placeholder="Tambah anggota baru..." onkeydown="if(event.key==='Enter'){event.preventDefault();addClubPlayer();}">
+      <button class="act" type="button" onclick="addClubPlayer()">Tambah</button>
+    </div>
+    <div class="sec"><h2>Venue langganan</h2></div>
+    <div id="venues"></div>
+    <div class="sec"><h2>Akses</h2></div>
+    <div class="note"><svg><use href="#i-info"/></svg><span id="accessNote"></span></div>
+    <div class="sec"><h2>Backup data</h2></div>
+    <div class="backup-row">
+      <button class="act quiet" onclick="downloadBackup()">Download JSON</button>
+      <button class="act quiet" onclick="document.getElementById('uploadJson').click()">Upload JSON</button>
+      <input type="file" id="uploadJson" accept="application/json,.json" style="display:none" onchange="uploadBackup(event)">
+    </div>
+    <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.45">Download untuk cadangan, upload untuk restore data sesi & roster.</p>
+  </section>
+
+  <!-- FORM -->
+  <section id="s-add" class="screen">
+    <div class="formtop">
+      <button class="rbtn" onclick="closeAdd()" aria-label="Batal"><svg><use href="#i-close"/></svg></button>
+      <b id="addTitle">Jadwal baru</b>
+      <button class="rbtn dark" onclick="saveEvent()" aria-label="Simpan"><svg><use href="#i-check"/></svg></button>
+    </div>
+    <div class="lbl">Nama acara</div>
+    <input class="field" id="fTitle" placeholder="Mabar Rabu malam">
+    <div class="lbl">Catatan buat anggota</div>
+    <textarea class="field" id="fNote" placeholder="Format Americano individu, kumpul 15 menit sebelum main."></textarea>
+    <div class="lbl">Tanggal &amp; jam</div>
+    <div class="two">
+      <div class="field ico"><svg><use href="#i-cal"/></svg><input type="date" id="fDate"></div>
+      <div class="field ico"><svg><use href="#i-clock"/></svg><input type="time" id="fTime" value="19:30"></div>
+    </div>
+    <div class="lbl">Tipe sesi</div>
+    <div class="seg" id="fType">
+      <button data-t="mabar" class="on" onclick="pickType('mabar')">Mabar</button>
+      <button data-t="sparing" onclick="pickType('sparing')">Sparing</button>
+      <button data-t="turnamen" onclick="pickType('turnamen')">Turnamen</button>
+    </div>
+    <div class="lbl">Venue</div>
+    <div class="field ico"><svg><use href="#i-pin"/></svg><input id="fVenue" list="venueOpts" placeholder="Pilih atau tulis venue"></div>
+    <datalist id="venueOpts"></datalist>
+    <div class="lbl">Court, durasi (jam) &amp; maks. pemain</div>
+    <div class="two" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="field ico"><svg><use href="#i-ball"/></svg><input type="number" id="fCourt" min="1" max="6" value="2" title="Jumlah court" placeholder="Court" oninput="var m=document.getElementById('fMax'); if(m&&!m.dataset.touched) m.value=(parseInt(this.value,10)||1)*4"></div>
+      <div class="field ico"><svg><use href="#i-clock"/></svg><input type="number" id="fDur" min="1" max="6" value="2" title="Durasi jam" placeholder="Jam"></div>
+      <div class="field ico"><svg><use href="#i-users"/></svg><input type="number" id="fMax" min="1" max="64" value="8" title="Maksimum pemain" placeholder="Max" oninput="this.dataset.touched='1'"></div>
+    </div>
+    <p style="font-size:11.5px;color:var(--ink-mute);margin:6px 0 0">Maks. pemain = slot yang tersedia (default 4×court).</p>
+    <div class="lbl">Anggota yang ikut</div>
+    <div class="chips" id="fRoster"></div>
+    <div class="add-player adminOnly">
+      <input class="field" id="fNewPlayer" placeholder="Nama baru..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFormPlayer();}">
+      <button class="act" type="button" onclick="addFormPlayer()">Tambah</button>
+    </div>
+    <button class="cta" onclick="saveEvent()">Simpan jadwal</button>
+    <button class="cta ghost" style="margin-top:10px" onclick="closeAdd()">Batal</button>
+  </section>
+</main>
+
+<nav class="tabbar" id="tabbar">
+  <button class="tab on" data-s="home" onclick="go('home')"><svg><use href="#i-home"/></svg>Beranda</button>
+  <button class="tab" data-s="jadwal" onclick="go('jadwal')"><svg><use href="#i-cal"/></svg>Jadwal</button>
+  <button class="tab" data-s="lineup" onclick="go('lineup')"><svg><use href="#i-users"/></svg>Line up</button>
+  <button class="tab" data-s="club" onclick="go('club')"><svg><use href="#i-user"/></svg>Club</button>
+</nav>
+
+<div class="scrim" id="scrim" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ STORE ============ */
+var store = (function(){
+  var mem = {}, live = true;
+  try{ localStorage.setItem('_t','1'); localStorage.removeItem('_t'); }catch(e){ live = false; }
+  return {
+    get:function(k,d){ try{ var v = live ? localStorage.getItem(k) : mem[k]; return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+    set:function(k,v){ var s=JSON.stringify(v); if(live){ try{ localStorage.setItem(k,s); return; }catch(e){} } mem[k]=s; }
+  };
+})();
+
+/* ============ KONSTANTA ============ */
+var ADMIN_PIN = '7777';
+var TYPE = {mabar:'Latihan', sparing:'Sparing', turnamen:'Turnamen', battle:'Sparing'};
+var TYPE_ICON = {mabar:'i-ball', sparing:'i-users', turnamen:'i-trophy', battle:'i-users'};
+var COLORS = ['#526627','#6c8437','#3c4b1c','#7d8f4a','#455a1f','#b08a58','#3d6f70','#5f7330','#c9694a','#8a4326'];
+var DAY = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+var DAYL = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+var MON = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function addDays(n){ var d=new Date(); d.setDate(d.getDate()+n); return iso(d); }
+function uid(){ return 'e'+Math.random().toString(36).slice(2,9); }
+
+function seed(){
+  return [
+    {id:uid(),title:'Turney KPB',type:'turnamen',date:'2026-09-05',time:null,venue:'Grand Garden',
+     note:'Dari pagi sampe naik podium 🥳',
+     groups:[{label:'Wakil padel.teroos',entries:['Oka-Juan']}]},
+    {id:uid(),title:'Latihan Minggu Pagi',subtitle:"Men's Double",type:'mabar',date:'2026-09-06',time:'08:00',dur:3,
+     venue:'Padel Grande',capMeta:'2 court · 3 jam · 16 pemain',rsvp:'https://reclub.co/id/m/S2WBUM',
+     note:'RSVP dulu sebelum kuota penuh.',
+     groups:[{label:"Men's Double",entries:['Pandu-Wikan','Julian-Ical','Ashof-Danang','Irvani-Sigit','Oka-TBC']}]},
+    {id:uid(),title:'Latihan Minggu Pagi',subtitle:'Ladies Only 💅🏻',type:'mabar',date:'2026-09-06',time:'08:00',dur:2,
+     venue:'Padel Grande',capMeta:'1 court · 2 jam · 8 pemain',rsvp:'https://reclub.co/id/m/XFMTKL',
+     note:'Slot cewek, RSVP lewat link ya.',
+     groups:[{label:'Peserta',entries:['Mia','Leni','Hila','Diyyah','Mita','Diana','Nova','Kezia']}]},
+    {id:uid(),title:'Battle on Court',subtitle:'padel.teroos x EHPadel 🏅',type:'battle',date:'2026-09-08',time:'20:00',
+     venue:'Agafi Court - Social Padel Hub',rsvp:'https://reclub.co/id/m/EY6R0Z',
+     note:'Battle antar club, format point system.',
+     groups:[{label:'Pairing',entries:['Oka-Alpat','Irvani-Ashof','Pandu-Wikan','Leni-Dina','Julian-Ical','Rian-Micle','Syafaat-Nadil','Elva-Mia']}]},
+    {id:uid(),title:'Sparing Level Up',type:'sparing',date:'2026-09-13',time:'16:00',venue:'Padel Grande',
+     note:'5 pair putra, 4 pair putri.',
+     groups:[
+       {label:"Men's Double",entries:['Oka-Juan','Rian-Michel','Irvani-Ashof','Arya-Yusuf','Lazuardi-Julian']},
+       {label:"Women's Double",entries:['Mia-Elva','Leni-Dina','Latul-Diyyah','Geges-Kezia']}
+     ]},
+    {id:uid(),title:'PBPI Kab Turney',type:'turnamen',date:'2026-09-27',time:'08:00',venue:'ASA Padel',
+     note:'Kabupaten, kategori campuran level.',
+     groups:[
+       {label:"Men's · Lower Bronze",entries:['Oka-Juan','Rian-Michelle']},
+       {label:"Women's · Lower Bronze",entries:['Leni-Dina']},
+       {label:"Women's · Beginner",entries:['Geges-Kezia']}
+     ]},
+    {id:uid(),title:'Padelfest Turney',type:'turnamen',date:'2026-10-03',time:'08:00',venue:'Padel Grande',
+     note:'Wakil tunggal club.',
+     groups:[{label:'Wakil padel.teroos',entries:['Leni-Dina']}]},
+    {id:uid(),title:'Walikota Turney',type:'turnamen',date:'2026-10-17',time:null,venue:'Padel Grande',
+     note:'4 kategori diikuti sekaligus.',
+     groups:[
+       {label:"Women's Upper",entries:['Leni-Dina']},
+       {label:"Men's Beginner",entries:['Irvani-Sigit']},
+       {label:'Fix Mix',entries:['Oka-Jojo']},
+       {label:"Men's Upper",entries:['Danang-Ashof','Julian-Ical']}
+     ]}
+  ];
+}
+
+var initEvents = store.get('teroos_events', null) || seed();
+var initUp = initEvents.slice().sort(function(a,b){ return (a.date+(a.time||'00:00'))<(b.date+(b.time||'00:00'))?-1:1; })
+  .filter(function(e){ return e.date>=addDays(0); });
+var initDate = initUp.length ? initUp[0].date : addDays(0);
+
+var state = {
+  screen:'home',
+  admin:false,
+  events: initEvents,
+  roster: store.get('teroos_roster', null),
+  filter:'all',
+  calFilter:'all',
+  calRef:new Date(initDate+'T00:00:00'),
+  selDate:initDate,
+  calMode:'strip',
+  lineupId:null,
+  editId:null,
+  formType:'mabar',
+  formPlayers:[],
+  pairEdit:null
+};
+function persist(){
+  store.set('teroos_events', state.events);
+  store.set('teroos_roster', state.roster || []);
+}
+function ensureRoster(){
+  if(state.roster && state.roster.length) return;
+  var set={};
+  state.events.forEach(function(e){ peopleList(e).forEach(function(n){ if(n && n!=='TBC') set[n]=1; }); });
+  state.roster = Object.keys(set).sort(function(a,b){ return a.localeCompare(b); });
+  persist();
+}
+
+/* ============ UTIL ============ */
+function ini(n){ var p=n.trim().split(' '); return (p[0][0]+(p[1]?p[1][0]:(p[0][1]||''))).toUpperCase(); }
+function col(n){ var s=0; for(var i=0;i<n.length;i++) s+=n.charCodeAt(i); return COLORS[s%COLORS.length]; }
+function ava(n,c){ return '<span class="a '+(c||'')+'" style="background:'+col(n)+'">'+ini(n)+'</span>'; }
+function ic(id,st){ return '<svg'+(st?' style="'+st+'"':'')+'><use href="#'+id+'"/></svg>'; }
+function endT(t,d){ var p=t.split(':'); return String((parseInt(p[0],10)+d)%24).padStart(2,'0')+':'+p[1]; }
+function cap(e){ return e.maxPlayers || ((e.court||1)*4); }
+function entryNames(en){ return en.split(/\s*-\s*/).map(function(s){ return s.trim(); }); }
+function peopleList(e){
+  if(e.groups){
+    var set={};
+    e.groups.forEach(function(g){ g.entries.forEach(function(en){ entryNames(en).forEach(function(n){ if(n && n!=='TBC') set[n]=1; }); }); });
+    return Object.keys(set);
+  }
+  return e.players.slice();
+}
+function peopleCount(e){ return peopleList(e).length; }
+function allRoster(){
+  ensureRoster();
+  return (state.roster || []).slice().sort(function(a,b){ return a.localeCompare(b); });
+}
+function allVenues(){
+  var set={};
+  state.events.forEach(function(e){ if(e.venue) set[e.venue]=1; });
+  return Object.keys(set).sort();
+}
+function avaOrTbc(n){ return n==='TBC' ? '<span class="a tbc">?</span>' : ava(n); }
+function personPill(n){
+  var confirmed = n!=='TBC';
+  var label = confirmed ? n : 'Menyusul';
+  var icon = confirmed ? 'i-check' : 'i-clock';
+  return '<span class="pchip'+(confirmed?'':' pend')+'">'+avaOrTbc(n)+'<em>'+label+'</em>'+ic(icon,'width:13px;height:13px')+'</span>';
+}
+function chipEntry(en){
+  var names = entryNames(en);
+  if(names.length>1) return '<span class="duo">'+names.map(personPill).join('<i class="amp">&amp;</i>')+'</span>';
+  return personPill(names[0]);
+}
+function groupStats(g){
+  var total=0, conf=0;
+  g.entries.forEach(function(en){ entryNames(en).forEach(function(n){ total++; if(n!=='TBC') conf++; }); });
+  return {total:total, conf:conf};
+}
+function eventStats(e){
+  var total=0, conf=0;
+  (e.groups||[]).forEach(function(g){ var s=groupStats(g); total+=s.total; conf+=s.conf; });
+  return {total:total, conf:conf};
+}
+function groupsHtml(e){
+  return e.groups.map(function(g){
+    var s=groupStats(g);
+    return '<div class="court"><div class="courth"><b>'+g.label+'</b><span>'+s.conf+'/'+s.total+' confirmed</span></div>'+
+      '<div class="chips">'+g.entries.map(chipEntry).join('')+'</div></div>';
+  }).join('');
+}
+function fmtS(d){ var x=new Date(d+'T00:00:00'); return DAY[x.getDay()]+', '+x.getDate()+' '+MON[x.getMonth()].slice(0,3); }
+function fmtL(d){ var x=new Date(d+'T00:00:00'); return DAYL[x.getDay()]+', '+x.getDate()+' '+MON[x.getMonth()]; }
+function byId(id){ for(var i=0;i<state.events.length;i++) if(state.events[i].id===id) return state.events[i]; return null; }
+function sortedEvents(){ return state.events.slice().sort(function(a,b){ return (a.date+(a.time||'00:00'))<(b.date+(b.time||'00:00'))?-1:1; }); }
+function upcoming(){ var t=addDays(0); return sortedEvents().filter(function(e){ return e.date>=t; }); }
+function toast(msg){
+  var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('on');
+  clearTimeout(el._t); el._t=setTimeout(function(){ el.classList.remove('on'); },2000);
+}
+function reAnimate(el){ if(!el) return; el.classList.remove('fade-swap'); void el.offsetWidth; el.classList.add('fade-swap'); }
+
+/* ============ ADMIN ============ */
+function applyAccess(){
+  document.querySelectorAll('.adminOnly').forEach(function(el){
+    if(state.admin){
+      el.style.display = el.classList.contains('add-player') ? 'flex' : '';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+  var lbl = state.admin ? 'Mode admin' : 'Mode member';
+  document.getElementById('modeLine').textContent = lbl;
+  [document.getElementById('lockBtn'), document.getElementById('lockBtn2')].forEach(function(b){
+    b.classList.toggle('admin', state.admin);
+    b.innerHTML = ic(state.admin ? 'i-unlock' : 'i-lock');
+  });
+  var note = document.getElementById('accessNote');
+  if(note) note.textContent = state.admin
+    ? 'Lo lagi masuk sebagai admin. Bisa bikin, ubah, hapus jadwal, dan acak lineup. Tap gembok lagi buat balik ke mode member.'
+    : 'Semua anggota bisa lihat jadwal dan lineup. Yang bisa ubah cuma admin, tap gembok di kanan atas dan masukin PIN.';
+}
+function toggleAdmin(){
+  if(state.admin){ state.admin=false; applyAccess(); go(state.screen); toast('Balik ke mode member'); return; }
+  document.getElementById('sheetBody').innerHTML =
+    '<h2>Masuk sebagai admin</h2>'+
+    '<p style="font-size:13.5px;line-height:1.55;color:var(--ink-soft);margin:0 0 18px">Jadwal ini dibaca semua anggota club. Perubahan cuma bisa dari admin.</p>'+
+    '<input class="field pin" id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••">'+
+    '<div id="pinErr" style="font-size:12.5px;color:#a6482f;margin-top:10px;display:none">PIN salah. Coba lagi.</div>'+
+    '<button class="cta" onclick="submitPin()">Buka akses admin</button>';
+  openSheet();
+  setTimeout(function(){ var i=document.getElementById('pinInput'); if(i){ i.focus();
+    i.addEventListener('keydown', function(ev){ if(ev.key==='Enter') submitPin(); }); } }, 240);
+}
+function submitPin(){
+  var v=(document.getElementById('pinInput')||{}).value||'';
+  if(v!==ADMIN_PIN){ document.getElementById('pinErr').style.display='block'; return; }
+  state.admin=true; applyAccess(); closeSheet(); go(state.screen); toast('Mode admin aktif');
+}
+
+/* ============ NAV ============ */
+function go(s){
+  state.screen=s;
+  document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('s-'+s).classList.add('active');
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.s===s); });
+  document.getElementById('tabbar').classList.toggle('hide', s==='add');
+  window.scrollTo(0,0);
+  if(s==='home') ensureRoster();
+renderHome();
+  if(s==='jadwal') renderJadwal();
+  if(s==='lineup') renderLineup();
+  if(s==='club') renderClub();
+}
+
+/* ============ HOME ============ */
+function renderHome(){
+  var up=upcoming();
+  var c={all:up.length,mabar:0,sparing:0,turnamen:0};
+  up.forEach(function(e){ var t=e.type==='battle'?'sparing':e.type; if(c[t]!==undefined) c[t]++; });
+  document.getElementById('homeFilters').innerHTML = ['all','mabar','sparing','turnamen'].map(function(k){
+    return '<button class="pill count'+(state.filter===k?' on':'')+'" data-key="'+k+'" onclick="setFilter(\''+k+'\')">'+
+      '<span class="n">'+c[k]+'</span>'+(k==='all'?'Semua':TYPE[k])+'</button>';
+  }).join('');
+
+  renderHomeList();
+}
+function renderHomeList(){
+  var up=upcoming();
+  var list=up.filter(function(e){ var t=e.type==='battle'?'sparing':e.type; return state.filter==='all'||t===state.filter; });
+  var el=document.getElementById('homeList');
+  el.innerHTML = list.length ? list.map(card).join('')
+    : blank('Belum ada di filter ini','Ganti filter atau tunggu admin naikin jadwal baru.');
+  reAnimate(el);
+}
+function setFilter(k){
+  state.filter=k;
+  document.querySelectorAll('#homeFilters .pill').forEach(function(el){ el.classList.toggle('on', el.dataset.key===k); });
+  renderHomeList();
+}
+
+function card(e){
+  var people=peopleList(e), extra=Math.max(people.length-3,0);
+  var stack=people.slice(0,3).map(function(p){ return ava(p); }).join('')+(extra?'<span class="a more">+'+extra+'</span>':'');
+  var timeLine = e.time ? fmtS(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtS(e.date)+' · jam menyusul';
+  var extraLine = '', right;
+  if(e.groups){
+    var st=eventStats(e);
+    extraLine = '<div class="line">'+ic('i-check')+st.conf+'/'+st.total+' confirmed</div>';
+    right = e.rsvp
+      ? '<a class="act '+e.type+'" href="'+e.rsvp+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+ic('i-link')+'RSVP</a>'
+      : '<span class="act quiet">Lihat lineup</span>';
+  } else if(e.rsvp){
+    right = '<a class="act '+e.type+'" href="'+e.rsvp+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+ic('i-link')+'RSVP</a>';
+  } else {
+    var free=cap(e)-e.players.length;
+    right = '<span class="act '+(free>0?'quiet':e.type)+'">'+(free>0 ? (free>12 ? e.players.length+'/'+cap(e)+' pemain' : free+' slot kosong') : 'Full '+e.players.length+' pemain')+'</span>';
+  }
+  return '<button class="card" onclick="openDetail(\''+e.id+'\')">'+
+    '<span class="badge '+(e.type==='battle'?'sparing':e.type)+'"><i></i>'+TYPE[e.type]+'</span>'+
+    '<span class="open">'+ic('i-open')+'</span>'+
+    '<h3>'+e.title+'</h3>'+
+    (e.subtitle ? '<p class="sub">'+e.subtitle+'</p>' : '')+
+    '<div class="line">'+ic('i-clock')+timeLine+'</div>'+
+    '<div class="line">'+ic('i-pin')+e.venue+(e.capMeta ? ' · '+e.capMeta : '')+'</div>'+
+    extraLine+
+    '<div class="foot"><span class="stack">'+stack+'</span>'+right+'</div>'+
+  '</button>';
+}
+function blank(t,m,btn){ return '<div class="empty">'+ic('i-cal')+'<b>'+t+'</b><p>'+m+'</p>'+(btn||'')+'</div>'; }
+
+/* ============ JADWAL ============ */
+function toggleCalView(){
+  state.calMode = state.calMode==='strip' ? 'month' : 'strip';
+  renderJadwal();
+}
+function shiftMonth(n){ state.calRef=new Date(state.calRef.getFullYear(), state.calRef.getMonth()+n, 1); renderJadwal(); }
+
+function pickDate(k){
+  var d=new Date(k+'T00:00:00');
+  var monthChanged = d.getMonth()!==state.calRef.getMonth() || d.getFullYear()!==state.calRef.getFullYear();
+  state.selDate=k;
+  state.calRef=d;
+  document.getElementById('stripLabel').textContent = MON[d.getMonth()]+' '+d.getFullYear();
+  document.getElementById('calMonth').textContent = MON[d.getMonth()]+' '+d.getFullYear();
+  if(state.calMode==='strip'){
+    updateStripSelection(k);
+  } else if(monthChanged){
+    renderMonth();
+  } else {
+    updateGridSelection(k);
+  }
+  renderAgenda();
+}
+function setCalFilter(k){
+  state.calFilter=k;
+  document.querySelectorAll('#calFilters .pill').forEach(function(el){ el.classList.toggle('on', el.dataset.key===k); });
+  renderAgenda();
+}
+
+function renderJadwal(){
+  var strip=state.calMode==='strip';
+  document.getElementById('dayStrip').style.display = strip?'':'none';
+  document.getElementById('monthCal').style.display = strip?'none':'';
+  document.getElementById('viewBtn').innerHTML = ic(strip?'i-grid':'i-cal');
+  var ref=new Date(state.selDate+'T00:00:00');
+  document.getElementById('stripLabel').textContent = MON[ref.getMonth()]+' '+ref.getFullYear();
+  strip ? renderStrip() : renderMonth();
+  document.getElementById('calFilters').innerHTML = ['all','mabar','sparing','turnamen'].map(function(k){
+    var icon = k==='all' ? 'i-cal' : TYPE_ICON[k];
+    return '<button class="pill'+(state.calFilter===k?' on':'')+'" data-key="'+k+'" onclick="setCalFilter(\''+k+'\')">'+
+      ic(icon)+(k==='all'?'Semua':TYPE[k])+'</button>';
+  }).join('');
+  renderAgenda();
+}
+function marks(key){
+  var evs=state.events.filter(function(e){ return e.date===key; });
+  return evs.slice(0,3).map(function(e){ return '<i class="'+e.type+'"></i>'; }).join('');
+}
+function updateStripSelection(k){
+  var el=document.getElementById('dayStrip');
+  var on=null;
+  el.querySelectorAll('.dchip').forEach(function(c){
+    var match = c.dataset.date===k;
+    c.classList.toggle('on', match);
+    if(match) on=c;
+  });
+  if(on && on.scrollIntoView){
+    try{ on.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(err){}
+  }
+}
+function updateGridSelection(k){
+  document.getElementById('calGrid').querySelectorAll('.cell').forEach(function(c){
+    c.classList.toggle('on', c.dataset.date===k);
+  });
+}
+function renderStrip(){
+  var base=new Date(); base.setDate(base.getDate()-1);
+  var html='', today=addDays(0);
+  for(var i=0;i<45;i++){
+    var d=new Date(base.getFullYear(), base.getMonth(), base.getDate()+i), k=iso(d);
+    var cls='dchip'+(k===state.selDate?' on':'')+(k===today?' now':'');
+    html += '<button class="'+cls+'" data-date="'+k+'" onclick="pickDate(\''+k+'\')">'+
+      '<span class="dn">'+DAY[d.getDay()]+'</span>'+
+      '<span class="num">'+d.getDate()+'</span>'+
+      '<span class="mk">'+marks(k)+'</span></button>';
+  }
+  var el=document.getElementById('dayStrip');
+  el.innerHTML=html;
+  reAnimate(el);
+  var on=el.querySelector('.dchip.on');
+  if(on) el.scrollLeft = Math.max(on.offsetLeft - 100, 0);
+}
+function renderMonth(){
+  var y=state.calRef.getFullYear(), m=state.calRef.getMonth();
+  document.getElementById('calMonth').textContent = MON[m]+' '+y;
+  var first=new Date(y,m,1), start=new Date(y,m,1-first.getDay()), today=addDays(0), html='';
+  DAY.forEach(function(d){ html += '<div class="dow">'+d.slice(0,2)+'</div>'; });
+  for(var i=0;i<42;i++){
+    var d=new Date(start.getFullYear(), start.getMonth(), start.getDate()+i), k=iso(d);
+    var cls='cell'+(d.getMonth()!==m?' mute':'')+(k===today?' now':'')+(k===state.selDate?' on':'');
+    html += '<button class="'+cls+'" data-date="'+k+'" onclick="pickDate(\''+k+'\')">'+d.getDate()+'<span class="mk">'+marks(k)+'</span></button>';
+    if(i>=34 && d.getMonth()!==m && d.getDay()===6) break;
+  }
+  var grid=document.getElementById('calGrid');
+  grid.innerHTML = html;
+  reAnimate(grid);
+}
+function slotOf(t){ if(!t) return 'pagi'; var h=parseInt(t.split(':')[0],10); return h<11?'pagi':(h<17?'sore':'malam'); }
+function renderAgenda(){
+  var evs=state.events.filter(function(e){ return e.date===state.selDate; })
+    .filter(function(e){ var t=e.type==='battle'?'sparing':e.type; return state.calFilter==='all'||t===state.calFilter; })
+    .sort(function(a,b){ return a.time<b.time?-1:1; });
+  var head='<div class="sec"><h2>'+fmtL(state.selDate)+'</h2><span class="muted">'+
+    (state.selDate===addDays(0)?'Hari ini':evs.length+' sesi')+'</span></div>';
+  var html;
+  if(!evs.length){
+    html = head + blank('Court kosong',
+      state.admin ? 'Belum ada sesi di tanggal ini. Tap plus buat jadwalin.' : 'Belum ada sesi di tanggal ini. Cek tanggal lain di strip atas.',
+      state.admin ? '<button class="act" onclick="openAdd(null,\''+state.selDate+'\')">'+ic('i-plus')+'Jadwalin sesi</button>' : '');
+  } else {
+    var groups={pagi:[],sore:[],malam:[]};
+    evs.forEach(function(e){ groups[slotOf(e.time)].push(e); });
+    var labels={pagi:['Pagi','i-sun'],sore:['Sore','i-sun'],malam:['Malam','i-moon']};
+    html=head;
+    ['pagi','sore','malam'].forEach(function(g){
+      if(!groups[g].length) return;
+      html += '<div class="part"><b>'+ic(labels[g][1])+labels[g][0]+'</b><span>'+groups[g].length+' sesi</span></div>';
+      html += groups[g].map(function(e,i){
+        return '<div class="tl"><div class="tl-t"><b>'+(e.time||'-')+'</b><span>'+(e.dur?e.dur+' jam':'')+'</span></div>'+
+          '<div class="tl-r"><span class="k"></span>'+(i<groups[g].length-1?'<span class="l"></span>':'')+'</div>'+
+          '<div class="tl-b">'+card(e)+'</div></div>';
+      }).join('');
+    });
+  }
+  var el=document.getElementById('agenda');
+  el.innerHTML = html;
+  reAnimate(el);
+}
+
+/* ============ LINEUP ============ */
+function makePairs(players){
+  var pool=(players||[]).filter(function(p){ return p && p!=='TBC'; }).slice();
+  for(var i=pool.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+  var list=[], k=0;
+  while(k+1<pool.length){ list.push([pool[k], pool[k+1]]); k+=2; }
+  return {list:list, unpaired:pool.slice(k)};
+}
+function pairsFromList(pairList, allPlayers){
+  var used={};
+  pairList.forEach(function(pr){ pr.forEach(function(p){ used[p]=1; }); });
+  var unpaired = (allPlayers||[]).filter(function(p){ return p && p!=='TBC' && !used[p]; });
+  return {list: pairList.map(function(pr){ return pr.slice(); }), unpaired: unpaired};
+}
+function normalizePairs(e){
+  if(!e || !e.pairs) return null;
+  // new format
+  if(e.pairs.list) return e.pairs;
+  // old format {courts, bench}
+  if(e.pairs.courts){
+    var list=[];
+    e.pairs.courts.forEach(function(c){
+      if(c[0]) list.push(c[0].slice());
+      if(c[1]) list.push(c[1].slice());
+    });
+    return {list:list, unpaired:(e.pairs.bench||[]).slice()};
+  }
+  return null;
+}
+function shufflePairs(){
+  if(!state.admin){ toast('Cuma admin yang bisa ubah lineup'); return; }
+  var e=byId(state.lineupId); if(!e || e.groups) return;
+  state.pairEdit=null;
+  e.pairs=makePairs(e.players); persist(); renderLineBody(); toast('Pasangan diacak ulang');
+}
+function startPairEdit(){
+  if(!state.admin){ toast('Cuma admin yang bisa ubah lineup'); return; }
+  var e=byId(state.lineupId); if(!e || e.groups) return;
+  var pairs=[];
+  var np=normalizePairs(e);
+  if(np) pairs = np.list.map(function(pr){ return pr.slice(); });
+  state.pairEdit={ eventId:e.id, pairs:pairs, pick:null };
+  renderLineBody();
+}
+function cancelPairEdit(){ state.pairEdit=null; renderLineBody(); }
+function pickForPair(name){
+  if(!state.pairEdit) return;
+  var pe=state.pairEdit;
+  var used={};
+  pe.pairs.forEach(function(pr){ pr.forEach(function(p){ used[p]=1; }); });
+  if(used[name]) return;
+  if(!pe.pick){ pe.pick=name; renderLineBody(); return; }
+  if(pe.pick===name){ pe.pick=null; renderLineBody(); return; }
+  pe.pairs.push([pe.pick, name]);
+  pe.pick=null;
+  renderLineBody();
+}
+function removeFormedPair(idx){
+  if(!state.pairEdit) return;
+  state.pairEdit.pairs.splice(idx,1);
+  state.pairEdit.pick=null;
+  renderLineBody();
+}
+function savePairEdit(){
+  if(!state.pairEdit) return;
+  var e=byId(state.pairEdit.eventId); if(!e) return;
+  e.pairs = pairsFromList(state.pairEdit.pairs, e.players||[]);
+  state.pairEdit=null;
+  persist();
+  renderLineBody();
+  toast('Pasangan disimpan');
+}
+function clearPairs(){
+  if(!state.admin) return;
+  var e=byId(state.lineupId); if(!e) return;
+  if(!confirm('Hapus semua pasangan sesi ini?')) return;
+  e.pairs=null;
+  state.pairEdit=null;
+  persist();
+  renderLineBody();
+  toast('Lineup dihapus');
+}
+function pickLineup(id){
+  state.lineupId=id;
+  state.pairEdit=null;
+  document.querySelectorAll('#linePicker .pill').forEach(function(el){ el.classList.toggle('on', el.dataset.id===id); });
+  renderLineBody();
+}
+function renderLineup(){
+  var up=upcoming();
+  if(!up.length){
+    document.getElementById('linePicker').innerHTML='';
+    var lb=document.getElementById('lineBody');
+    lb.innerHTML=blank('Belum ada sesi','Lineup muncul setelah admin bikin jadwal.');
+    reAnimate(lb);
+    return;
+  }
+  if(!state.lineupId || !byId(state.lineupId)) state.lineupId=up[0].id;
+  document.getElementById('linePicker').innerHTML = up.map(function(e){
+    return '<button class="pill'+(e.id===state.lineupId?' on':'')+'" data-id="'+e.id+'" onclick="pickLineup(\''+e.id+'\')">'+fmtS(e.date)+' · '+e.title+'</button>';
+  }).join('');
+  renderLineBody();
+}
+function renderLineBody(){
+  var ev=byId(state.lineupId);
+  if(!ev) return;
+  document.getElementById('lineSub').textContent = peopleCount(ev)+' orang · '+fmtS(ev.date);
+  var shuffleBtn = document.querySelector('#s-lineup .topbar .rbtn.adminOnly');
+  if(shuffleBtn) shuffleBtn.style.display = (state.admin && !ev.groups && !state.pairEdit) ? '' : 'none';
+
+  var html;
+  if(ev.groups){
+    html='<div class="sec"><h2>'+ev.title+(ev.subtitle?' · '+ev.subtitle:'')+'</h2><span class="muted">'+peopleCount(ev)+' orang</span></div>';
+    html += groupsHtml(ev);
+    html += '<div class="note" style="margin-top:6px">'+ic('i-info')+'<span>Lineup event ini fixed, bukan hasil pengacakan otomatis.</span></div>';
+  } else if(state.pairEdit && state.pairEdit.eventId===ev.id){
+    html = renderPairEditor(ev);
+  } else if(!ev.pairs){
+    html = blank('Pasangan belum disusun',
+      state.admin ? 'Susun manual siapa pair dengan siapa, atau acak otomatis.' : 'Admin belum nyusun pasangan buat sesi ini.',
+      state.admin ? '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'+
+        '<button class="act" onclick="startPairEdit()">'+ic('i-users')+'Susun pasangan</button>'+
+        '<button class="act quiet" onclick="shufflePairs()">'+ic('i-shuffle')+'Acak saja</button></div>' : '');
+  } else {
+    var np = normalizePairs(ev);
+    html='<div class="sec"><h2>'+ev.title+'</h2><span class="muted">'+fmtS(ev.date)+' · '+ev.time+'</span></div>';
+    html += '<div class="lbl">Pasangan tetap</div>';
+    if(np && np.list.length){
+      html += '<div class="formed" style="margin-bottom:14px">'+np.list.map(function(pr){
+        return '<div class="fp">'+ava(pr[0])+ava(pr[1])+'<b>'+pr[0]+' &amp; '+pr[1]+'</b></div>';
+      }).join('')+'</div>';
+    } else {
+      html += '<p class="hint" style="margin-bottom:14px">Belum ada pasangan</p>';
+    }
+    var un = (np && np.unpaired) ? np.unpaired : [];
+    // also include players not in list/unpaired (data drift)
+    var used={};
+    if(np){ np.list.forEach(function(pr){ pr.forEach(function(p){ used[p]=1; }); }); un.forEach(function(p){ used[p]=1; }); }
+    (ev.players||[]).forEach(function(p){ if(p && p!=='TBC' && !used[p]) un.push(p); });
+    html += '<div class="lbl">Belum ada pair ('+un.length+')</div>';
+    if(un.length){
+      html += '<div class="chips">'+un.map(function(p){ return '<span class="chip">'+ava(p)+p+'</span>'; }).join('')+'</div>';
+    } else {
+      html += '<p class="hint">Semua sudah berpasangan</p>';
+    }
+    html += '<div style="margin-top:18px"></div>';
+    if(state.admin){
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="cta" style="margin:0;flex:1" onclick="startPairEdit()">Ubah pasangan</button>'+
+        '<button class="act quiet" onclick="shufflePairs()">'+ic('i-shuffle')+'Acak ulang</button>'+
+        '<button class="act quiet" onclick="clearPairs()">Hapus</button></div>';
+    } else {
+      html += '<div class="note">'+ic('i-info')+'<span>Pasangan disusun admin.</span></div>';
+    }
+  }
+  var el=document.getElementById('lineBody');
+  el.innerHTML = html;
+  reAnimate(el);
+}
+function renderPairEditor(ev){
+  var pe=state.pairEdit;
+  var used={};
+  pe.pairs.forEach(function(pr){ pr.forEach(function(p){ used[p]=1; }); });
+  var pool=(ev.players||[]).filter(function(p){ return p && p!=='TBC' && !used[p]; });
+  var html='<div class="pair-edit">';
+  html+='<div class="sec"><h2>Susun pasangan</h2><span class="muted">'+ev.title+'</span></div>';
+  html+='<p class="hint">Tap 2 nama untuk membentuk pasangan tetap.</p>';
+  html+='<div class="lbl">Pemain tersedia'+(pe.pick?' · pilih pasangan untuk <b>'+pe.pick+'</b>':'')+'</div>';
+  html+='<div class="pool">';
+  if(!pool.length) html+='<span class="muted" style="font-size:13px">Semua sudah dipasangkan</span>';
+  else html+=pool.map(function(p){
+    var sel=pe.pick===p?' sel':'';
+    return '<button class="chip'+sel+'" onclick="pickForPair(\''+p.replace(/'/g,"\\'")+'\')">'+ava(p)+p+'</button>';
+  }).join('');
+  html+='</div>';
+  html+='<div class="lbl">Pair terbentuk ('+pe.pairs.length+')</div>';
+  html+='<div class="formed">';
+  if(!pe.pairs.length) html+='<span class="muted" style="font-size:13px">Belum ada pair</span>';
+  else html+=pe.pairs.map(function(pr,i){
+    return '<div class="fp">'+ava(pr[0])+ava(pr[1])+'<b>'+pr[0]+' &amp; '+pr[1]+'</b>'+
+      '<button class="xbtn" onclick="removeFormedPair('+i+')" aria-label="Hapus pair">'+ic('i-close','width:14px;height:14px')+'</button></div>';
+  }).join('');
+  html+='</div>';
+  html+='<div class="actions">'+
+    '<button class="act" onclick="savePairEdit()">Simpan pasangan</button>'+
+    '<button class="act quiet" onclick="shufflePairs()">Acak saja</button>'+
+    '<button class="act quiet" onclick="cancelPairEdit()">Batal</button>'+
+  '</div></div>';
+  return html;
+}
+function pairBox(pair){
+  return '<div class="pair">'+pair.map(function(p){ return '<div class="p">'+ava(p)+'<em>'+p+'</em></div>'; }).join('')+'</div>';
+}
+
+/* ============ CLUB ============ */
+function renderClub(){
+  var roster=allRoster();
+  var courts=state.events.reduce(function(a,e){ return a+(e.court||0); },0);
+  document.getElementById('pSesi').textContent = state.events.length;
+  document.getElementById('pAnggota').textContent = roster.length;
+  document.getElementById('pCourt').textContent = courts || '-';
+  document.getElementById('clubSub').textContent = roster.length+' anggota tercatat';
+  document.getElementById('rosterCount').textContent = roster.length+' orang';
+  document.getElementById('roster').innerHTML = roster.map(function(p){
+    if(state.admin){
+      return '<span class="chip" style="cursor:pointer" title="Tap untuk rename">'+ava(p)+
+        '<span onclick="renamePlayer(\''+p.replace(/'/g,"\\'")+'\')">'+p+'</span>'+
+        '<span class="x" onclick="event.stopPropagation();removeFromRoster(\''+p.replace(/'/g,"\\'")+'\')" title="Hapus dari roster">'+ic('i-close')+'</span></span>';
+    }
+    return '<span class="chip">'+ava(p)+p+'</span>';
+  }).join('');
+  var vc={}; state.events.forEach(function(e){ vc[e.venue]=(vc[e.venue]||0)+1; });
+  document.getElementById('venues').innerHTML = allVenues().map(function(v){
+    return '<div class="row">'+ic('i-pin')+'<b>'+v+'</b><span>'+(vc[v]||0)+' sesi</span></div>';
+  }).join('');
+  applyAccess();
+}
+
+/* ============ SHEET ============ */
+var sheetDrag = {startY:0, currentY:0, dragging:false};
+function openSheet(){
+  var sheet = document.getElementById('sheet');
+  sheet.style.transform = '';
+  sheet.style.transition = '';
+  document.getElementById('scrim').classList.add('on');
+  sheet.classList.add('on');
+}
+function closeSheet(){
+  var sheet = document.getElementById('sheet');
+  sheet.style.transform = '';
+  sheet.style.transition = '';
+  document.getElementById('scrim').classList.remove('on');
+  sheet.classList.remove('on');
+}
+function initSheetDrag(){
+  var sheet = document.getElementById('sheet');
+  var grab = sheet.querySelector('.grab');
+  function onStart(e){
+    if(sheet.scrollTop > 4) return;
+    sheetDrag.dragging = true;
+    sheetDrag.startY = (e.touches ? e.touches[0].clientY : e.clientY);
+    sheetDrag.currentY = 0;
+    sheet.style.transition = 'none';
+  }
+  function onMove(e){
+    if(!sheetDrag.dragging) return;
+    var y = (e.touches ? e.touches[0].clientY : e.clientY);
+    var dy = Math.max(0, y - sheetDrag.startY);
+    sheetDrag.currentY = dy;
+    sheet.style.transform = 'translateY('+dy+'px)';
+    if(e.cancelable) e.preventDefault();
+  }
+  function onEnd(){
+    if(!sheetDrag.dragging) return;
+    sheetDrag.dragging = false;
+    sheet.style.transition = 'transform .24s cubic-bezier(.32,.72,0,1)';
+    if(sheetDrag.currentY > 110){
+      closeSheet();
+    } else {
+      sheet.style.transform = 'translateY(0)';
+      setTimeout(function(){ sheet.style.transition = ''; sheet.style.transform = ''; }, 260);
+    }
+  }
+  grab.addEventListener('touchstart', onStart, {passive:true});
+  grab.addEventListener('touchmove', onMove, {passive:false});
+  grab.addEventListener('touchend', onEnd);
+  grab.addEventListener('mousedown', onStart);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onEnd);
+}
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function gcalUrl(e){
+  var title = e.title + (e.subtitle ? ' - '+e.subtitle : '');
+  var details = e.note || '';
+  if(e.rsvp) details += (details?'\n\n':'')+'RSVP: '+e.rsvp;
+  var datesParam;
+  if(e.time){
+    var start = new Date(e.date+'T'+e.time+':00+07:00');
+    var end = new Date(start.getTime() + (e.dur||2)*3600000);
+    var fmt = function(d){ return d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'; };
+    datesParam = fmt(start)+'/'+fmt(end);
+  } else {
+    var d0 = e.date.replace(/-/g,'');
+    var end2 = new Date(e.date+'T00:00:00+07:00'); end2.setDate(end2.getDate()+1);
+    var d1 = end2.getFullYear()+pad2(end2.getMonth()+1)+pad2(end2.getDate());
+    datesParam = d0+'/'+d1;
+  }
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE'+
+    '&text='+encodeURIComponent(title)+
+    '&dates='+datesParam+
+    '&details='+encodeURIComponent(details)+
+    '&location='+encodeURIComponent(e.venue||'');
+}
+
+function openDetail(id){
+  var e=byId(id);
+  var timeLine = e.time ? fmtL(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtL(e.date)+' · jam menyusul';
+  var body =
+    '<span class="badge '+(e.type==='battle'?'sparing':e.type)+'"><i></i>'+TYPE[e.type]+'</span>'+
+    '<h2>'+e.title+'</h2>'+
+    (e.subtitle ? '<p class="sub" style="padding-right:0;font-size:13.5px;margin:0 0 2px">'+e.subtitle+'</p>' : '')+
+    '<div class="line">'+ic('i-clock')+timeLine+'</div>'+
+    '<div class="line">'+ic('i-pin')+e.venue+(e.capMeta?' · '+e.capMeta:(e.court?' · '+e.court+' court':''))+'</div>'+
+    '<p style="font-size:14px;line-height:1.55;color:var(--ink-soft);margin:15px 0 0">'+e.note+'</p>';
+
+  if(e.rsvp){
+    body += '<a class="cta" style="display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;text-decoration:none" href="'+e.rsvp+'" target="_blank" rel="noopener">'+ic('i-link')+'Buka RSVP</a>';
+  }
+  body += '<a class="gcal-link" href="'+gcalUrl(e)+'" target="_blank" rel="noopener">'+ic('i-cal')+' Tambah ke Google Calendar</a>';
+
+  if(e.groups){
+    var st=eventStats(e);
+    body += '<div class="lbl">Lineup ('+st.conf+'/'+st.total+' confirmed)</div>'+groupsHtml(e);
+    body += state.admin
+      ? '<div style="display:flex;gap:9px;margin-top:22px">'+
+          '<span class="note" style="flex:1">'+ic('i-info')+'<span>Lineup event ini fixed dari data import, edit langsung di seed kalau ada perubahan pasangan.</span></span>'+
+          '<button class="cta ghost" style="margin:0;width:62px;flex:none;display:grid;place-items:center" onclick="removeEvent(\''+e.id+'\')" aria-label="Hapus">'+ic('i-trash','width:20px;height:20px')+'</button>'+
+        '</div>'
+      : '<button class="cta" style="margin-top:22px" onclick="shareEvent(\''+e.id+'\')">Salin info sesi</button>';
+  } else {
+    var free=cap(e)-e.players.length;
+    var confCount = e.players.filter(function(p){ return p && p !== 'TBC'; }).length;
+    var totalPlayers = e.players.length;
+    var np = normalizePairs(e);
+    var lineup;
+    if(np && np.list.length){
+      lineup = np.list.map(function(pr){
+        return '<div class="row"><b>'+pr[0]+' &amp; '+pr[1]+'</b><span>pair</span></div>';
+      }).join('');
+      if(np.unpaired && np.unpaired.length){
+        lineup += '<div class="lbl" style="margin-top:10px">Belum ada pair</div><div class="chips">'+
+          np.unpaired.map(function(p){ return '<span class="chip">'+ava(p)+p+'</span>'; }).join('')+'</div>';
+      }
+    } else {
+      lineup = state.admin
+        ? '<div class="note">'+ic('i-info')+'<span>Belum ada pasangan.</span></div>'+
+          '<button class="act" style="margin-top:10px" onclick="closeSheet();state.lineupId=\''+e.id+'\';go(\'lineup\');startPairEdit()">'+ic('i-users')+'Susun pasangan</button>'
+        : '<div class="note">'+ic('i-info')+'<span>Pasangan belum disusun buat sesi ini.</span></div>';
+    }
+    var capN=cap(e);
+    var freeLabel = free<=0 ? '' : (free>12 ? ' · max '+capN : ' · '+free+' kosong');
+    body += '<div class="lbl">Yang ikut ('+e.players.length+'/'+capN+freeLabel+')</div>'+
+      '<div class="confirmed-summary">'+ic('i-check')+' '+confCount+' dari '+totalPlayers+' pemain sudah confirmed</div>'+
+      '<div class="chips">'+e.players.map(function(p){
+        var isConf = p && p !== 'TBC';
+        return '<span class="chip'+(isConf?'':' pend')+'">'+avaOrTbc(p)+p+
+          (isConf ? ic('i-check','width:13px;height:13px') : ic('i-clock','width:13px;height:13px'))+
+          '</span>';
+      }).join('')+'</div>'+
+      '<div class="lbl">Line up</div>'+lineup;
+    body += state.admin
+      ? '<div style="display:flex;gap:9px;margin-top:22px">'+
+          '<button class="cta" style="margin:0;flex:1" onclick="closeSheet();openAdd(\''+e.id+'\')">Ubah jadwal</button>'+
+          '<button class="cta ghost" style="margin:0;width:62px;flex:none;display:grid;place-items:center" onclick="removeEvent(\''+e.id+'\')" aria-label="Hapus">'+ic('i-trash','width:20px;height:20px')+'</button>'+
+        '</div>'
+      : '<button class="cta" style="margin-top:22px" onclick="shareEvent(\''+e.id+'\')">Salin info sesi</button>';
+  }
+
+  document.getElementById('sheetBody').innerHTML = body;
+  openSheet();
+}
+function shareEvent(id){
+  var e=byId(id);
+  var when = e.time ? e.time+(e.dur?'-'+endT(e.time,e.dur):'') : 'jam menyusul';
+  var txt = e.title+'\n'+fmtL(e.date)+' · '+when+'\n'+e.venue+
+    (e.rsvp?'\nRSVP: '+e.rsvp:'')+'\n'+e.note+'\nPeserta: '+peopleList(e).join(', ');
+  var done=function(){ toast('Info sesi disalin'); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done, function(){ fallbackCopy(txt, done); });
+  } else fallbackCopy(txt, done);
+}
+function fallbackCopy(txt, cb){
+  var ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); cb(); }catch(err){ toast('Gagal menyalin'); }
+  document.body.removeChild(ta);
+}
+function removeEvent(id){
+  if(!state.admin){ toast('Cuma admin yang bisa hapus'); return; }
+  state.events=state.events.filter(function(e){ return e.id!==id; });
+  persist(); closeSheet(); go(state.screen); toast('Jadwal dihapus');
+}
+
+/* ============ FORM ============ */
+function openAdd(id, date){
+  if(!state.admin){ toast('Cuma admin yang bisa ubah jadwal'); return; }
+  state.editId=id||null;
+  var e=id?byId(id):null;
+  document.getElementById('addTitle').textContent = e?'Ubah jadwal':'Jadwal baru';
+  document.getElementById('fTitle').value = e?e.title:'';
+  document.getElementById('fNote').value = e?e.note:'';
+  document.getElementById('fDate').value = e?e.date:(date||addDays(1));
+  document.getElementById('fTime').value = e?e.time:'19:30';
+  document.getElementById('venueOpts').innerHTML = allVenues().map(function(v){ return '<option value="'+v+'">'; }).join('');
+  document.getElementById('fVenue').value = e?e.venue:(allVenues()[0]||'');
+  document.getElementById('fCourt').value = e?e.court:2;
+  document.getElementById('fDur').value = e?e.dur:2;
+  var fMax=document.getElementById('fMax');
+  fMax.value = e?(e.maxPlayers||(e.court||2)*4):8;
+  delete fMax.dataset.touched;
+  pickType(e?e.type:'mabar');
+  state.formPlayers = e?e.players.slice():[];
+  renderPicker();
+  go('add');
+}
+function closeAdd(){ var back = state.editId?'jadwal':'home'; state.editId=null; go(back); }
+function pickType(t){
+  state.formType=t;
+  document.querySelectorAll('#fType button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
+}
+function renderPicker(){
+  var names = allRoster().slice();
+  state.formPlayers.forEach(function(p){ if(names.indexOf(p)<0) names.push(p); });
+  names.sort(function(a,b){ return a.localeCompare(b); });
+  document.getElementById('fRoster').innerHTML = names.map(function(p){
+    var on = state.formPlayers.indexOf(p)>-1;
+    return '<button class="chip'+(on?'':' off')+'" onclick="togglePlayer(\''+p.replace(/'/g,"\\'")+'\')">'+
+      (on?ava(p):'')+p+(on?'<span class="x">'+ic('i-close')+'</span>':'')+'</button>';
+  }).join('');
+}
+function togglePlayer(p){
+  var i=state.formPlayers.indexOf(p);
+  if(i>-1) state.formPlayers.splice(i,1); else state.formPlayers.push(p);
+  renderPicker();
+}
+function addFormPlayer(){
+  if(!state.admin){ toast('Cuma admin yang bisa ubah'); return; }
+  var el = document.getElementById('fNewPlayer');
+  var name = (el.value||'').trim();
+  if(!name){ el.focus(); toast('Isi nama dulu'); return; }
+  ensureRoster();
+  if(state.roster.indexOf(name)<0){ state.roster.push(name); persist(); }
+  if(state.formPlayers.indexOf(name)<0) state.formPlayers.push(name);
+  el.value = '';
+  renderPicker();
+  toast(name+' ditambahkan');
+}
+function addClubPlayer(){
+  if(!state.admin){ toast('Cuma admin yang bisa ubah'); return; }
+  var el = document.getElementById('clubNewPlayer');
+  var name = (el.value||'').trim();
+  if(!name){ el.focus(); toast('Isi nama dulu'); return; }
+  ensureRoster();
+  if(state.roster.indexOf(name)>-1){ toast(name+' sudah ada'); el.value=''; return; }
+  state.roster.push(name);
+  persist();
+  el.value = '';
+  renderClub();
+  toast(name+' ditambahkan ke roster');
+}
+function renamePlayer(oldName){
+  if(!state.admin){ toast('Cuma admin yang bisa ubah'); return; }
+  var neu = prompt('Ubah nama pemain:', oldName);
+  if(neu===null) return;
+  neu = neu.trim();
+  if(!neu || neu===oldName) return;
+  ensureRoster();
+  state.events.forEach(function(e){
+    if(e.players) e.players = e.players.map(function(p){ return p===oldName ? neu : p; });
+    if(e.pairs){
+      var np=normalizePairs(e);
+      if(np){
+        np.list = np.list.map(function(pr){ return pr.map(function(p){ return p===oldName ? neu : p; }); });
+        np.unpaired = np.unpaired.map(function(p){ return p===oldName ? neu : p; });
+        e.pairs = np;
+      }
+    }
+    if(e.groups){
+      e.groups.forEach(function(g){
+        g.entries = g.entries.map(function(en){
+          return en.split(/\s*-\s*/).map(function(s){ return s.trim()===oldName ? neu : s.trim(); }).join('-');
+        });
+      });
+    }
+  });
+  state.roster = state.roster.map(function(p){ return p===oldName ? neu : p; });
+  if(state.roster.indexOf(neu)<0) state.roster.push(neu);
+  persist();
+  renderClub();
+  renderHome();
+  toast(oldName+' → '+neu);
+}
+function removeFromRoster(name){
+  if(!state.admin){ toast('Cuma admin yang bisa ubah'); return; }
+  if(!confirm('Hapus '+name+' dari daftar anggota?\n(Tidak menghapus dari sesi yang sudah lewat)')) return;
+  ensureRoster();
+  state.roster = state.roster.filter(function(p){ return p!==name; });
+  persist();
+  renderClub();
+  toast(name+' dihapus dari roster');
+}
+function saveEvent(){
+  if(!state.admin){ toast('Cuma admin yang bisa simpan'); return; }
+  var title=document.getElementById('fTitle').value.trim(), date=document.getElementById('fDate').value;
+  if(!title){ document.getElementById('fTitle').focus(); toast('Nama acara belum diisi'); return; }
+  if(!date){ document.getElementById('fDate').focus(); toast('Tanggal belum diisi'); return; }
+  var data={
+    title:title,
+    note:document.getElementById('fNote').value.trim()||'Belum ada catatan dari admin.',
+    date:date,
+    time:document.getElementById('fTime').value||'19:30',
+    dur:Math.max(parseInt(document.getElementById('fDur').value,10)||2,1),
+    court:Math.max(parseInt(document.getElementById('fCourt').value,10)||1,1),
+    maxPlayers:Math.max(parseInt(document.getElementById('fMax').value,10)||0,1),
+    venue:document.getElementById('fVenue').value.trim()||(allVenues()[0]||''),
+    type:state.formType,
+    players:state.formPlayers.slice()
+  };
+  if(state.editId){
+    var e=byId(state.editId);
+    Object.keys(data).forEach(function(k){ e[k]=data[k]; });
+    if(e.pairs){
+      var np=normalizePairs(e);
+      var n=0; if(np){ np.list.forEach(function(pr){ n+=pr.length; }); n+=(np.unpaired||[]).length; }
+      if(n !== e.players.filter(function(p){ return p && p!=='TBC'; }).length) e.pairs=null;
+    }
+    toast('Jadwal diperbarui');
+  } else {
+    data.id=uid(); data.pairs=null; state.events.push(data);
+    toast('Jadwal ditambahkan');
+  }
+  persist();
+  state.selDate=date; state.editId=null;
+  go('jadwal');
+}
+
+/* ============ BACKUP ============ */
+function downloadBackup(){
+  ensureRoster();
+  var payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    events: state.events,
+    roster: state.roster || []
+  };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'padel-teroos-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Backup diunduh');
+}
+function uploadBackup(ev){
+  var file = ev.target.files && ev.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var data = JSON.parse(reader.result);
+      var list = Array.isArray(data) ? data : (data.events || null);
+      if(!list || !Array.isArray(list)){ toast('Format JSON tidak valid'); return; }
+      if(!confirm('Restore '+list.length+' sesi dari backup? Data sekarang akan diganti.')) return;
+      state.events = list;
+      if(data.roster && Array.isArray(data.roster)) state.roster = data.roster;
+      else state.roster = null;
+      persist();
+      ensureRoster();
+      renderHome();
+      renderJadwal();
+      renderClub();
+      toast('Data berhasil di-restore');
+    }catch(err){
+      toast('Gagal membaca file JSON');
+    }
+    ev.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+/* ============ INIT ============ */
+applyAccess();
+renderHome();
+renderJadwal();
+initSheetDrag();
+</script>
+</body>
+</html>
