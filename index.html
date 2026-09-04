@@ -57,7 +57,7 @@ input,textarea{font-family:inherit;color:inherit}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ===== TOP BAR ===== */
-.topbar{display:flex;align-items:center;gap:11px;padding:calc(env(safe-area-inset-top) + 20px) 0 16px}
+.topbar{display:flex;align-items:center;gap:11px;padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
 .logo{flex:none;display:flex;align-items:center;height:28px}
 .logo img{height:22px;width:auto;display:block}
 .who{flex:1;min-width:0;line-height:1.25;display:flex;align-items:center;gap:8px}
@@ -75,7 +75,8 @@ input,textarea{font-family:inherit;color:inherit}
 
 /* ===== HEADLINE ===== */
 h1.head{font-size:38px;line-height:1.06;font-weight:700;letter-spacing:-.03em;margin:8px 0 22px;color:#242d16}
-.sec{display:flex;align-items:center;justify-content:space-between;margin:26px 0 13px}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:12px 0 10px}
+#s-home > .sec:first-of-type{margin-top:6px}
 .sec h2{margin:0;font-size:17.5px;font-weight:700;letter-spacing:-.02em}
 .sec button{font-size:13px;font-weight:600;color:var(--matcha)}
 .sec .muted{font-size:12.5px;color:var(--ink-mute);font-weight:500}
@@ -396,7 +397,7 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
       <button class="rbtn" id="lockBtn" onclick="toggleAdmin()" aria-label="Akses admin"><svg><use href="#i-lock"/></svg></button>
       <button class="rbtn dark adminOnly" onclick="openAdd()" aria-label="Tambah jadwal"><svg><use href="#i-plus"/></svg></button>
     </div>
-    <div class="sec"><h2>Sesi terdekat</h2><button onclick="go('jadwal')">Buka kalender</button></div>
+    <div class="sec"><h2>Jadwal main kita</h2><button onclick="go('jadwal')">Buka kalender</button></div>
     <div class="pills" id="homeFilters"></div>
     <div id="homeList" style="margin-top:14px"></div>
   </section>
@@ -461,6 +462,14 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
     <div id="venues"></div>
     <div class="sec"><h2>Akses</h2></div>
     <div class="note"><svg><use href="#i-info"/></svg><span id="accessNote"></span></div>
+    <div class="sec"><h2>Sync bersama</h2></div>
+    <div class="note" id="syncNote"><svg><use href="#i-info"/></svg><span id="syncStatus">Cek status…</span></div>
+    <div class="backup-row adminOnly" id="syncActions" style="margin-top:10px">
+      <button class="act" onclick="enableCloudSync()">Aktifkan sync</button>
+      <button class="act quiet" onclick="copySyncLink()">Salin link</button>
+      <button class="act quiet" onclick="disconnectSync()">Matikan</button>
+    </div>
+    <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.45">Aktifkan sync supaya semua member yang buka link melihat update admin secara otomatis.</p>
     <div class="sec"><h2>Backup data</h2></div>
     <div class="backup-row">
       <button class="act quiet" onclick="downloadBackup()">Download JSON</button>
@@ -613,9 +622,104 @@ var state = {
   formPlayers:[],
   pairEdit:null
 };
+var CLOUD_API = 'https://getpantry.cloud/apiv1/pantry/';
+var CLOUD_BASKET = 'teroos';
+function getSyncId(){
+  try{
+    var q = new URLSearchParams(location.search).get('sync');
+    if(q){ store.set('teroos_sync', q); return q; }
+  }catch(e){}
+  return store.get('teroos_sync', null);
+}
+function setSyncId(id){ store.set('teroos_sync', id); }
+function syncShareUrl(){
+  var id = getSyncId();
+  if(!id) return location.href.split('?')[0];
+  var u = location.href.split('?')[0] + '?sync=' + encodeURIComponent(id);
+  return u;
+}
 function persist(){
   store.set('teroos_events', state.events);
   store.set('teroos_roster', state.roster || []);
+  cloudPush();
+}
+function cloudPush(){
+  var id = getSyncId();
+  if(!id) return;
+  var payload = {
+    events: state.events,
+    roster: state.roster || [],
+    updatedAt: new Date().toISOString()
+  };
+  fetch(CLOUD_API + id + '/basket/' + CLOUD_BASKET, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(r){
+    if(r.ok) { /* ok */ }
+  }).catch(function(){});
+}
+function cloudPull(){
+  var id = getSyncId();
+  if(!id) return Promise.resolve(false);
+  return fetch(CLOUD_API + id + '/basket/' + CLOUD_BASKET)
+    .then(function(r){ if(!r.ok) throw new Error('no'); return r.json(); })
+    .then(function(data){
+      if(!data || !Array.isArray(data.events)) return false;
+      state.events = data.events;
+      if(data.roster && Array.isArray(data.roster)) state.roster = data.roster;
+      store.set('teroos_events', state.events);
+      store.set('teroos_roster', state.roster || []);
+      return true;
+    })
+    .catch(function(){ return false; });
+}
+function enableCloudSync(){
+  if(!state.admin){ toast('Cuma admin yang bisa aktifkan sync'); return; }
+  toast('Menyiapkan cloud…');
+  fetch('https://getpantry.cloud/apiv1/pantry/create', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({name:'padel-teroos', description:'jadwal club padel.teroos'})
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    var id = data.pantryID || data.pantryId || data.id;
+    if(!id){ toast('Gagal buat cloud sync'); return; }
+    setSyncId(id);
+    // initial push
+    return fetch(CLOUD_API + id + '/basket/' + CLOUD_BASKET, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({events:state.events, roster:state.roster||[], updatedAt:new Date().toISOString()})
+    }).then(function(){
+      var url = syncShareUrl();
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(function(){
+          toast('Sync aktif · link disalin');
+        }).catch(function(){ toast('Sync aktif'); });
+      } else toast('Sync aktif');
+      renderClub();
+      // update URL without reload
+      try{ history.replaceState(null,'',url); }catch(e){}
+    });
+  }).catch(function(){ toast('Gagal konek cloud'); });
+}
+function copySyncLink(){
+  var url = syncShareUrl();
+  if(!getSyncId()){ toast('Belum aktifkan sync'); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){ toast('Link sync disalin'); });
+  } else {
+    prompt('Salin link ini:', url);
+  }
+}
+function disconnectSync(){
+  if(!state.admin) return;
+  if(!confirm('Matikan cloud sync di device ini? Data lokal tetap ada.')) return;
+  store.set('teroos_sync', null);
+  try{ history.replaceState(null,'', location.href.split('?')[0]); }catch(e){}
+  renderClub();
+  toast('Sync dimatikan');
 }
 function ensureRoster(){
   if(state.roster && state.roster.length) return;
@@ -737,11 +841,18 @@ function go(s){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.s===s); });
   document.getElementById('tabbar').classList.toggle('hide', s==='add');
   window.scrollTo(0,0);
-  if(s==='home') ensureRoster();
-renderHome();
-  if(s==='jadwal') renderJadwal();
-  if(s==='lineup') renderLineup();
-  if(s==='club') renderClub();
+  function paint(){
+    if(s==='home'){ ensureRoster(); renderHome(); }
+    if(s==='jadwal') renderJadwal();
+    if(s==='lineup') renderLineup();
+    if(s==='club') renderClub();
+  }
+  // Quiet refresh from cloud when navigating (so member always sees latest)
+  if(getSyncId() && s!=='add'){
+    cloudPull().then(function(ok){ paint(); }).catch(function(){ paint(); });
+  } else {
+    paint();
+  }
 }
 
 /* ============ HOME ============ */
@@ -1155,6 +1266,13 @@ function renderClub(){
   document.getElementById('venues').innerHTML = allVenues().map(function(v){
     return '<div class="row">'+ic('i-pin')+'<b>'+v+'</b><span>'+(vc[v]||0)+' sesi</span></div>';
   }).join('');
+  var sid = getSyncId();
+  var st = document.getElementById('syncStatus');
+  if(st){
+    st.textContent = sid
+      ? 'Sync aktif. Member pakai link yang sama agar data selalu update.'
+      : 'Belum sync. Data masih tersimpan per-device. Admin bisa aktifkan sync di bawah.';
+  }
   applyAccess();
 }
 
@@ -1516,8 +1634,16 @@ function uploadBackup(ev){
 
 /* ============ INIT ============ */
 applyAccess();
-renderHome();
-renderJadwal();
+ensureRoster();
+cloudPull().then(function(ok){
+  if(ok) ensureRoster();
+  renderHome();
+  renderJadwal();
+  if(ok) toast('Data cloud dimuat');
+}).catch(function(){
+  renderHome();
+  renderJadwal();
+});
 initSheetDrag();
 </script>
 </body>
