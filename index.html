@@ -478,11 +478,11 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
     <div class="sec"><h2>Sync bersama</h2></div>
     <div class="note" id="syncNote"><svg><use href="#i-info"/></svg><span id="syncStatus">Cek status…</span></div>
     <div class="backup-row adminOnly" id="syncActions" style="margin-top:10px">
-      <button class="act" onclick="enableCloudSync()">Aktifkan sync</button>
+      <button class="act" onclick="enableCloudSync()">Push data ke cloud</button>
       <button class="act quiet" onclick="copySyncLink()">Salin link</button>
       <button class="act quiet" onclick="disconnectSync()">Matikan</button>
     </div>
-    <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.5">Setelah sync aktif, member cukup buka <b>link polos</b> site ini (tanpa tambahan apapun). Update admin langsung ikut.</p>
+    <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.5">Auto-sync lewat Firebase. Member cukup buka <b>link polos</b> — tanpa tombol sync. Tiap admin menyimpan jadwal, data ikut ke cloud.</p>
     <details style="margin-top:8px;font-size:12px;color:var(--ink-mute);line-height:1.5">
       <summary style="cursor:pointer;font-weight:600;color:var(--ink-soft)">Cara buat Firebase (2 menit)</summary>
       <ol style="padding-left:18px;margin:8px 0">
@@ -651,9 +651,10 @@ var state = {
 };
 /* Cloud sync via Firebase Realtime Database (free, CORS OK) */
 function resolveCloudDb(){
+  // URL tertanam di kode = sumber utama (link polos, auto sync)
+  if(typeof EMBEDDED_CLOUD_DB === 'string' && EMBEDDED_CLOUD_DB) return String(EMBEDDED_CLOUD_DB).replace(/\/$/,'');
   var fromStore = store.get('teroos_fb', null);
   if(fromStore) return String(fromStore).replace(/\/$/,'');
-  if(typeof EMBEDDED_CLOUD_DB === 'string' && EMBEDDED_CLOUD_DB) return String(EMBEDDED_CLOUD_DB).replace(/\/$/,'');
   // legacy query param (sekali jalan, lalu disimpan)
   try{
     var params = new URLSearchParams(location.search);
@@ -1333,8 +1334,13 @@ function renderClub(){
   var st = document.getElementById('syncStatus');
   if(st){
     st.textContent = cfg
-      ? 'Sync aktif. Member cukup buka link polos site ini.'
-      : 'Belum sync. Data masih per-device. Admin aktifkan sync (Firebase gratis).';
+      ? 'Auto-sync aktif. Update admin langsung ke semua yang buka link polos.'
+      : 'Belum ada URL Firebase di kode. Isi EMBEDDED_CLOUD_DB lalu deploy.';
+  }
+  var actions = document.getElementById('syncActions');
+  if(actions && cfg && EMBEDDED_CLOUD_DB){
+    // tidak wajib aktifkan manual lagi
+    actions.style.opacity = '0.7';
   }
   applyAccess();
 }
@@ -1706,9 +1712,8 @@ function uploadBackup(ev){
 /* ============ INIT ============ */
 applyAccess();
 ensureRoster();
-cloudPull().then(function(ok){
-  if(ok) ensureRoster();
-  // rapikan URL jadi link polos
+function startApp(fromCloud){
+  ensureRoster();
   try{
     if(getSyncConfig() && (location.search.indexOf('s=')>=0 || location.search.indexOf('sync=')>=0)){
       history.replaceState(null,'', syncShareUrl());
@@ -1716,11 +1721,34 @@ cloudPull().then(function(ok){
   }catch(e){}
   renderHome();
   renderJadwal();
-  if(ok) toast('Data cloud dimuat');
-}).catch(function(){
-  renderHome();
-  renderJadwal();
-});
+  // Auto-refresh dari cloud tiap 20 detik (member selalu dapat update admin)
+  if(getSyncConfig()){
+    setInterval(function(){
+      if(state.screen==='add' || state.pairEdit) return;
+      cloudPull().then(function(ok){
+        if(!ok) return;
+        ensureRoster();
+        if(state.screen==='home') renderHome();
+        else if(state.screen==='jadwal') renderJadwal();
+        else if(state.screen==='lineup') renderLineup();
+        else if(state.screen==='club') renderClub();
+      });
+    }, 20000);
+  }
+}
+if(getSyncConfig()){
+  cloudPull().then(function(ok){
+    if(ok){
+      startApp(true);
+    } else {
+      // Cloud kosong → push data lokal sekali supaya link polos langsung terisi
+      cloudPush();
+      startApp(false);
+    }
+  }).catch(function(){ startApp(false); });
+} else {
+  startApp(false);
+}
 initSheetDrag();
 </script>
 </body>
