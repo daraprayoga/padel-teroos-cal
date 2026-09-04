@@ -469,7 +469,17 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
       <button class="act quiet" onclick="copySyncLink()">Salin link</button>
       <button class="act quiet" onclick="disconnectSync()">Matikan</button>
     </div>
-    <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.45">Aktifkan sync supaya semua member yang buka link melihat update admin secara otomatis.</p>
+    <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.5">Pakai Firebase gratis. Admin aktifkan sekali, salin link ke member — semua otomatis dapat update.</p>
+    <details style="margin-top:8px;font-size:12px;color:var(--ink-mute);line-height:1.5">
+      <summary style="cursor:pointer;font-weight:600;color:var(--ink-soft)">Cara buat Firebase (2 menit)</summary>
+      <ol style="padding-left:18px;margin:8px 0">
+        <li>Buka console.firebase.google.com → Create project</li>
+        <li>Build → Realtime Database → Create Database → Start in <b>test mode</b></li>
+        <li>Copy URL (…firebasedatabase.app)</li>
+        <li>Rules: pastikan .read dan .write true, Publish</li>
+        <li>Kembali ke sini → Aktifkan sync → tempel URL</li>
+      </ol>
+    </details>
     <div class="sec"><h2>Backup data</h2></div>
     <div class="backup-row">
       <button class="act quiet" onclick="downloadBackup()">Download JSON</button>
@@ -622,21 +632,42 @@ var state = {
   formPlayers:[],
   pairEdit:null
 };
-var CLOUD_API = 'https://getpantry.cloud/apiv1/pantry/';
-var CLOUD_BASKET = 'teroos';
-function getSyncId(){
+/* Cloud sync via Firebase Realtime Database (free, CORS OK) */
+function getSyncConfig(){
   try{
     var q = new URLSearchParams(location.search).get('sync');
-    if(q){ store.set('teroos_sync', q); return q; }
+    if(q){
+      // format: base64(json{id,db}) or plain id with saved db
+      try{
+        var decoded = JSON.parse(atob(q.replace(/-/g,'+').replace(/_/g,'/')));
+        if(decoded && decoded.id && decoded.db){
+          store.set('teroos_sync', decoded.id);
+          store.set('teroos_fb', decoded.db);
+          return {id: decoded.id, db: decoded.db};
+        }
+      }catch(e){
+        store.set('teroos_sync', q);
+      }
+    }
   }catch(e){}
-  return store.get('teroos_sync', null);
+  var id = store.get('teroos_sync', null);
+  var db = store.get('teroos_fb', null);
+  if(id && db) return {id:id, db:db};
+  return null;
 }
-function setSyncId(id){ store.set('teroos_sync', id); }
+function getSyncId(){
+  var c = getSyncConfig();
+  return c ? c.id : null;
+}
 function syncShareUrl(){
-  var id = getSyncId();
-  if(!id) return location.href.split('?')[0];
-  var u = location.href.split('?')[0] + '?sync=' + encodeURIComponent(id);
-  return u;
+  var c = getSyncConfig();
+  if(!c) return location.href.split('?')[0];
+  var payload = btoa(JSON.stringify({id:c.id, db:c.db})).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  return location.href.split('?')[0] + '?sync=' + payload;
+}
+function fbUrl(c){
+  var base = c.db.replace(/\/$/,'');
+  return base + '/teroos/' + encodeURIComponent(c.id) + '.json';
 }
 function persist(){
   store.set('teroos_events', state.events);
@@ -644,26 +675,26 @@ function persist(){
   cloudPush();
 }
 function cloudPush(){
-  var id = getSyncId();
-  if(!id) return;
+  var c = getSyncConfig();
+  if(!c) return;
   var payload = {
     events: state.events,
     roster: state.roster || [],
     updatedAt: new Date().toISOString()
   };
-  fetch(CLOUD_API + id + '/basket/' + CLOUD_BASKET, {
-    method: 'POST',
+  fetch(fbUrl(c), {
+    method: 'PUT',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify(payload)
   }).then(function(r){
-    if(r.ok) { /* ok */ }
-  }).catch(function(){});
+    if(!r.ok) console.warn('cloud push failed', r.status);
+  }).catch(function(e){ console.warn('cloud push error', e); });
 }
 function cloudPull(){
-  var id = getSyncId();
-  if(!id) return Promise.resolve(false);
-  return fetch(CLOUD_API + id + '/basket/' + CLOUD_BASKET)
-    .then(function(r){ if(!r.ok) throw new Error('no'); return r.json(); })
+  var c = getSyncConfig();
+  if(!c) return Promise.resolve(false);
+  return fetch(fbUrl(c) + '?ts=' + Date.now())
+    .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
     .then(function(data){
       if(!data || !Array.isArray(data.events)) return false;
       state.events = data.events;
@@ -676,47 +707,53 @@ function cloudPull(){
 }
 function enableCloudSync(){
   if(!state.admin){ toast('Cuma admin yang bisa aktifkan sync'); return; }
-  toast('Menyiapkan cloud…');
-  fetch('https://getpantry.cloud/apiv1/pantry/create', {
-    method:'POST',
+  var existing = store.get('teroos_fb', '');
+  var db = prompt(
+    'Tempel Firebase Realtime Database URL.\\n\\nContoh:\\nhttps://nama-project-default-rtdb.asia-southeast1.firebasedatabase.app\\n\\n(Buat gratis di console.firebase.google.com — lihat panduan di bawah)',
+    existing || ''
+  );
+  if(db===null) return;
+  db = (db||'').trim().replace(/\/$/,'');
+  if(!db || db.indexOf('http')!==0){ toast('URL Firebase tidak valid'); return; }
+  // quick rules check
+  var id = store.get('teroos_sync', null) || ('c' + Math.random().toString(36).slice(2,10));
+  store.set('teroos_fb', db);
+  store.set('teroos_sync', id);
+  toast('Menyimpan ke cloud…');
+  var payload = {
+    events: state.events,
+    roster: state.roster || [],
+    updatedAt: new Date().toISOString()
+  };
+  fetch(fbUrl({id:id, db:db}), {
+    method:'PUT',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({name:'padel-teroos', description:'jadwal club padel.teroos'})
-  }).then(function(r){ return r.json(); })
-  .then(function(data){
-    var id = data.pantryID || data.pantryId || data.id;
-    if(!id){ toast('Gagal buat cloud sync'); return; }
-    setSyncId(id);
-    // initial push
-    return fetch(CLOUD_API + id + '/basket/' + CLOUD_BASKET, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({events:state.events, roster:state.roster||[], updatedAt:new Date().toISOString()})
-    }).then(function(){
-      var url = syncShareUrl();
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(url).then(function(){
-          toast('Sync aktif · link disalin');
-        }).catch(function(){ toast('Sync aktif'); });
-      } else toast('Sync aktif');
-      renderClub();
-      // update URL without reload
-      try{ history.replaceState(null,'',url); }catch(e){}
-    });
-  }).catch(function(){ toast('Gagal konek cloud'); });
+    body: JSON.stringify(payload)
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    var url = syncShareUrl();
+    try{ history.replaceState(null,'',url); }catch(e){}
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){ toast('Sync aktif · link disalin'); }).catch(function(){ toast('Sync aktif'); });
+    } else toast('Sync aktif');
+    renderClub();
+  }).catch(function(err){
+    console.warn(err);
+    toast('Gagal simpan. Cek URL & rules Firebase (.read/.write true)');
+  });
 }
 function copySyncLink(){
+  if(!getSyncConfig()){ toast('Belum aktifkan sync'); return; }
   var url = syncShareUrl();
-  if(!getSyncId()){ toast('Belum aktifkan sync'); return; }
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(url).then(function(){ toast('Link sync disalin'); });
-  } else {
-    prompt('Salin link ini:', url);
-  }
+  } else prompt('Salin link ini:', url);
 }
 function disconnectSync(){
   if(!state.admin) return;
   if(!confirm('Matikan cloud sync di device ini? Data lokal tetap ada.')) return;
   store.set('teroos_sync', null);
+  // keep fb url for reconnect
   try{ history.replaceState(null,'', location.href.split('?')[0]); }catch(e){}
   renderClub();
   toast('Sync dimatikan');
@@ -1266,12 +1303,12 @@ function renderClub(){
   document.getElementById('venues').innerHTML = allVenues().map(function(v){
     return '<div class="row">'+ic('i-pin')+'<b>'+v+'</b><span>'+(vc[v]||0)+' sesi</span></div>';
   }).join('');
-  var sid = getSyncId();
+  var cfg = getSyncConfig();
   var st = document.getElementById('syncStatus');
   if(st){
-    st.textContent = sid
-      ? 'Sync aktif. Member pakai link yang sama agar data selalu update.'
-      : 'Belum sync. Data masih tersimpan per-device. Admin bisa aktifkan sync di bawah.';
+    st.textContent = cfg
+      ? 'Sync aktif ('+cfg.id+'). Bagikan link sync ke member.'
+      : 'Belum sync. Data masih per-device. Admin aktifkan sync (Firebase gratis).';
   }
   applyAccess();
 }
