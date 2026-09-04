@@ -218,14 +218,16 @@ a.act{text-decoration:none}
 .pair-edit .pool{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
 .pair-edit .pool .chip{cursor:pointer}
 .pair-edit .pool .chip.sel{outline:2px solid var(--matcha);outline-offset:1px;background:var(--matcha-wash)}
-.pair-edit .formed{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-.pair-edit .formed .fp{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r-md);
+.formed{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.formed .fp{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r-md);
   background:var(--card);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh)}
-.pair-edit .formed .fp b{flex:1;font-size:13.5px;font-weight:600}
-.pair-edit .formed .fp .xbtn{width:28px;height:28px;min-width:28px;min-height:28px;flex:none;
+.formed .fp .a{width:28px;height:28px;border-radius:var(--r-pill);display:grid;place-items:center;
+  color:#fff;font-size:10px;font-weight:700;flex:none}
+.formed .fp b{flex:1;font-size:13.5px;font-weight:600;min-width:0}
+.formed .fp .xbtn{width:28px;height:28px;min-width:28px;min-height:28px;flex:none;
   border-radius:var(--r-pill);display:grid;place-items:center;
   background:rgba(0,0,0,.06);border:none;cursor:pointer;padding:0;color:var(--ink-mute)}
-.pair-edit .formed .fp .xbtn svg{width:14px;height:14px;display:block}
+.formed .fp .xbtn svg{width:14px;height:14px;display:block}
 .pair-edit .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .pair-edit .actions .act{flex:1;min-width:120px;justify-content:center}
 
@@ -969,6 +971,7 @@ function startPairEdit(){
   var np=normalizePairs(e);
   if(np) pairs = np.list.map(function(pr){ return pr.slice(); });
   state.pairEdit={ eventId:e.id, pairs:pairs, pick:null };
+  scrollLinePill(e.id);
   renderLineBody();
 }
 function cancelPairEdit(){ state.pairEdit=null; renderLineBody(); }
@@ -1013,7 +1016,16 @@ function pickLineup(id){
   state.lineupId=id;
   state.pairEdit=null;
   document.querySelectorAll('#linePicker .pill').forEach(function(el){ el.classList.toggle('on', el.dataset.id===id); });
+  scrollLinePill(id);
   renderLineBody();
+}
+function scrollLinePill(id){
+  var box=document.getElementById('linePicker');
+  if(!box) return;
+  var el=box.querySelector('.pill[data-id="'+id+'"]') || box.querySelector('.pill.on');
+  if(!el) return;
+  var left = el.offsetLeft - (box.clientWidth/2) + (el.clientWidth/2);
+  box.scrollTo({left: Math.max(0,left), behavior:'smooth'});
 }
 function renderLineup(){
   var up=upcoming();
@@ -1028,6 +1040,7 @@ function renderLineup(){
   document.getElementById('linePicker').innerHTML = up.map(function(e){
     return '<button class="pill'+(e.id===state.lineupId?' on':'')+'" data-id="'+e.id+'" onclick="pickLineup(\''+e.id+'\')">'+fmtS(e.date)+' · '+e.title+'</button>';
   }).join('');
+  setTimeout(function(){ scrollLinePill(state.lineupId); }, 40);
   renderLineBody();
 }
 function renderLineBody(){
