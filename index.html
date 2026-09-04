@@ -3,8 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<meta name="theme-color" content="#f3f1e7">
-<title>padel.teroos · Jadwal Club</title>
+<meta name="theme-color" content="#2f3a18" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2f3a18">
+<meta name="application-name" content="padel.teroos">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="padel.teroos">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Jadwal club padel.teroos — Bekasi">
+<title>padel.teroos</title>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABaUlEQVR4nGNkwAL0rST+YxOnFFw89oIRXQxFQN9K4r+yDn8gLSyHgbtXPq5HdggLuuV3r3xcT0sHQD34H+YIJnpazsAACQFlHf5AWDQzwVxFD8vRHcHAwMDARKsERwzQt5L4zzRQlsPAgDuABZ/ksZ0XGcon+jEwMDAwHN72EC5u6yWPVT02NZ35mxis3PVJdwCy5TADbSydGY4c34vTMGxqyif6MRzbeRGnI3BGAbLlMIDPcnxqsJlF0AH0AkPTAWXJMwmyiQV4cwE+y/E5omtuOuUO6MzfhFPT2y/PGYR5JHGysem12kZiLiAW+AZ7UKSfZAe8/fIcTsPytpW7Poo4TR0AC25hHkmGYzsvMjAwQAotZHGaOgDdEpgjyLGcbAdQE4w6YNQBg9cB+FoxpAK8LaKLx14wKuvwB9DaEdjAxWMvGJkYGFDb6fQAyP0QJphL6OUImOWwrtmAd04xusswh9DCcmzdcwC/E6YARY5KxQAAAABJRU5ErkJggg==">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
