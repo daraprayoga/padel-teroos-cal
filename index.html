@@ -299,6 +299,7 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 .cta{width:100%;padding:19px;border-radius:var(--r-pill);background:#2b3417;color:#fff;font-size:16px;
   font-weight:700;letter-spacing:-.01em;margin-top:26px;box-shadow:var(--sh-dark);transition:box-shadow .14s}
 .cta:active{box-shadow:inset 0 3px 10px rgba(0,0,0,.34)}
+.cta svg{width:20px;height:20px;flex:none}
 .cta.ghost{background:rgba(255,255,255,.9);color:#2b3417;border:1px solid var(--line);box-shadow:none}
 .formtop{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 20px) 0 4px}
 .formtop b{font-size:17px;font-weight:700}
@@ -524,6 +525,8 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
     </div>
     <div class="lbl">Nama acara</div>
     <input class="field" id="fTitle" placeholder="Mabar Rabu malam">
+    <div class="lbl">Subjudul <span style="font-weight:400;color:var(--ink-mute)">(opsional, misal "Men's Double")</span></div>
+    <input class="field" id="fSubtitle" placeholder="Kosongin kalau gak perlu">
     <div class="lbl">Catatan buat anggota</div>
     <textarea class="field" id="fNote" placeholder="Format Americano individu, kumpul 15 menit sebelum main."></textarea>
     <div class="lbl">Tanggal &amp; jam</div>
@@ -540,6 +543,9 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
     <div class="lbl">Venue</div>
     <div class="field ico"><svg><use href="#i-pin"/></svg><input id="fVenue" list="venueOpts" placeholder="Pilih atau tulis venue"></div>
     <datalist id="venueOpts"></datalist>
+    <div class="lbl">Link RSVP <span style="font-weight:400;color:var(--ink-mute)">(opsional)</span></div>
+    <input class="field" id="fRsvp" placeholder="https://...">
+    <div id="fFlatFields">
     <div class="lbl">Court, durasi (jam) &amp; maks. pemain</div>
     <div class="two" style="grid-template-columns:1fr 1fr 1fr">
       <div class="field ico"><svg><use href="#i-ball"/></svg><input type="number" id="fCourt" min="1" max="6" value="2" title="Jumlah court" placeholder="Court" oninput="var m=document.getElementById('fMax'); if(m&&!m.dataset.touched) m.value=(parseInt(this.value,10)||1)*4"></div>
@@ -552,6 +558,10 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
     <div class="add-player adminOnly">
       <input class="field" id="fNewPlayer" placeholder="Nama baru..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFormPlayer();}">
       <button class="act" type="button" onclick="addFormPlayer()">Tambah</button>
+    </div>
+    </div>
+    <div class="note" id="fGroupsNote" style="display:none">
+      <svg><use href="#i-info"/></svg><span>Event ini pakai lineup berkategori (hasil import). Nama acara, jam, venue, dll bisa diubah di sini — buat ubah pasangan/kategori, tutup dulu lalu tap "Ubah pasangan" di halaman detail.</span>
     </div>
     <button class="cta" onclick="saveEvent()">Simpan jadwal</button>
     <button class="cta ghost" style="margin-top:10px" onclick="closeAdd()">Batal</button>
@@ -660,7 +670,9 @@ var state = {
   formType:'mabar',
   formPlayers:[],
   pairEdit:null,
-  pairEditPending:false
+  pairEditPending:false,
+  editingGroups:false,
+  groupsEdit:null
 };
 /* Cloud sync via Firebase Realtime Database (free, CORS OK) */
 function resolveCloudDb(){
@@ -861,6 +873,75 @@ function groupsHtml(e){
     return '<div class="court"><div class="courth"><b>'+g.label+'</b><span>'+s.conf+'/'+s.total+' confirmed</span></div>'+
       '<div class="chips">'+g.entries.map(chipEntry).join('')+'</div></div>';
   }).join('');
+}
+function escapeAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+/* ============ EDITOR PASANGAN (event tipe groups/kategori) ============ */
+function openGroupsPairEdit(id){
+  if(!state.admin){ toast('Cuma admin yang bisa ubah pasangan'); return; }
+  var e=byId(id);
+  if(!e || !e.groups) return;
+  state.groupsEdit = { eventId:id, groups: JSON.parse(JSON.stringify(e.groups)) };
+  renderGroupsEditor();
+  openSheet();
+}
+function geSyncFromDom(){
+  var ge=state.groupsEdit; if(!ge) return;
+  document.querySelectorAll('[data-role=glabel]').forEach(function(inp){
+    var gi=parseInt(inp.dataset.gi,10);
+    if(ge.groups[gi]) ge.groups[gi].label = inp.value;
+  });
+  document.querySelectorAll('[data-role=gentry]').forEach(function(inp){
+    var gi=parseInt(inp.dataset.gi,10), ei=parseInt(inp.dataset.ei,10);
+    if(ge.groups[gi] && ge.groups[gi].entries[ei]!==undefined) ge.groups[gi].entries[ei] = inp.value;
+  });
+}
+function geAddEntry(gi){ geSyncFromDom(); state.groupsEdit.groups[gi].entries.push(''); renderGroupsEditor(); }
+function geRemoveEntry(gi,ei){ geSyncFromDom(); state.groupsEdit.groups[gi].entries.splice(ei,1); renderGroupsEditor(); }
+function geAddGroup(){ geSyncFromDom(); state.groupsEdit.groups.push({label:'Kategori baru', entries:['']}); renderGroupsEditor(); }
+function geRemoveGroup(gi){ geSyncFromDom(); state.groupsEdit.groups.splice(gi,1); renderGroupsEditor(); }
+function geCancel(){ state.groupsEdit=null; closeSheet(); }
+function geSave(){
+  geSyncFromDom();
+  var ge=state.groupsEdit; if(!ge) return;
+  var cleaned = ge.groups.map(function(g){
+    return { label:(g.label||'').trim()||'Kategori', entries:g.entries.map(function(x){ return (x||'').trim(); }).filter(Boolean) };
+  }).filter(function(g){ return g.entries.length; });
+  if(!cleaned.length){ toast('Minimal 1 kategori dengan 1 pasangan/nama'); return; }
+  var e=byId(ge.eventId);
+  e.groups = cleaned;
+  state.groupsEdit=null;
+  persist();
+  closeSheet();
+  go(state.screen);
+  toast('Pasangan diperbarui');
+}
+function renderGroupsEditor(){
+  var ge=state.groupsEdit; if(!ge) return;
+  var html = '<h2 style="margin:0 0 4px">Ubah pasangan</h2>'+
+    '<p style="font-size:12.5px;color:var(--ink-mute);margin:0 0 16px">Tulis pasangan sebagai "Nama-Nama" (misal Oka-Juan), atau satu nama aja buat peserta solo. Kosongin baris buat hapus.</p>';
+  html += ge.groups.map(function(g,gi){
+    var html_rows = g.entries.map(function(en,ei){
+      return '<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">'+
+        '<input class="field" style="flex:1;padding:12px 14px" data-role="gentry" data-gi="'+gi+'" data-ei="'+ei+'" value="'+escapeAttr(en)+'" placeholder="Nama-Nama">'+
+        '<button class="rbtn" style="width:38px;height:38px;flex:none" onclick="geRemoveEntry('+gi+','+ei+')" aria-label="Hapus baris">'+ic('i-close','width:15px;height:15px')+'</button>'+
+      '</div>';
+    }).join('');
+    return '<div class="court" style="margin-bottom:14px">'+
+      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">'+
+        '<input class="field" style="flex:1;padding:12px 14px;font-weight:700" data-role="glabel" data-gi="'+gi+'" value="'+escapeAttr(g.label)+'" placeholder="Nama kategori">'+
+        '<button class="rbtn" style="width:38px;height:38px;flex:none" onclick="geRemoveGroup('+gi+')" aria-label="Hapus kategori">'+ic('i-trash','width:15px;height:15px')+'</button>'+
+      '</div>'+
+      html_rows+
+      '<button class="act" style="margin-top:4px" onclick="geAddEntry('+gi+')">'+ic('i-plus','width:13px;height:13px')+'Tambah baris</button>'+
+    '</div>';
+  }).join('');
+  html += '<button class="cta ghost" onclick="geAddGroup()">'+ic('i-plus','width:16px;height:16px')+'Tambah kategori</button>'+
+    '<div style="display:flex;gap:9px;margin-top:14px">'+
+      '<button class="cta" style="margin:0;flex:1" onclick="geSave()">Simpan pasangan</button>'+
+      '<button class="cta ghost" style="margin:0;flex:1" onclick="geCancel()">Batal</button>'+
+    '</div>';
+  document.getElementById('sheetBody').innerHTML = html;
 }
 function fmtS(d){ var x=new Date(d+'T00:00:00'); return DAY[x.getDay()]+', '+x.getDate()+' '+MON[x.getMonth()].slice(0,3); }
 function fmtL(d){ var x=new Date(d+'T00:00:00'); return DAYL[x.getDay()]+', '+x.getDate()+' '+MON[x.getMonth()]; }
@@ -1479,7 +1560,7 @@ function openDetail(id){
     '<p style="font-size:14px;line-height:1.55;color:var(--ink-soft);margin:15px 0 0">'+e.note+'</p>';
 
   if(e.rsvp){
-    body += '<a class="cta" style="display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;text-decoration:none" href="'+e.rsvp+'" target="_blank" rel="noopener">'+ic('i-link')+'Buka RSVP</a>';
+    body += '<a class="cta" style="display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;text-decoration:none" href="'+e.rsvp+'" target="_blank" rel="noopener">'+ic('i-link','width:18px;height:18px')+'Buka RSVP</a>';
   }
   body += '<a class="gcal-link" href="'+gcalUrl(e)+'" target="_blank" rel="noopener">'+ic('i-cal')+' Tambah ke Google Calendar</a>';
 
@@ -1488,9 +1569,10 @@ function openDetail(id){
     body += '<div class="lbl">Lineup ('+st.conf+'/'+st.total+' confirmed)</div>'+groupsHtml(e);
     body += state.admin
       ? '<div style="display:flex;gap:9px;margin-top:22px">'+
-          '<span class="note" style="flex:1">'+ic('i-info')+'<span>Lineup event ini fixed dari data import, edit langsung di seed kalau ada perubahan pasangan.</span></span>'+
+          '<button class="cta" style="margin:0;flex:1" onclick="closeSheet();openAdd(\''+e.id+'\')">Ubah jadwal</button>'+
           '<button class="cta ghost" style="margin:0;width:62px;flex:none;display:grid;place-items:center" onclick="removeEvent(\''+e.id+'\')" aria-label="Hapus">'+ic('i-trash','width:20px;height:20px')+'</button>'+
-        '</div>'
+        '</div>'+
+        '<button class="act" style="margin-top:12px;width:100%;justify-content:center" onclick="openGroupsPairEdit(\''+e.id+'\')">'+ic('i-users')+'Ubah pasangan</button>'
       : '<button class="cta" style="margin-top:22px" onclick="shareEvent(\''+e.id+'\')">Salin info sesi</button>';
   } else {
     var free=cap(e)-e.players.length;
@@ -1564,21 +1646,26 @@ function openAdd(id, date){
   if(!state.admin){ toast('Cuma admin yang bisa ubah jadwal'); return; }
   state.editId=id||null;
   var e=id?byId(id):null;
+  state.editingGroups = !!(e && e.groups);
   document.getElementById('addTitle').textContent = e?'Ubah jadwal':'Jadwal baru';
   document.getElementById('fTitle').value = e?e.title:'';
+  document.getElementById('fSubtitle').value = e&&e.subtitle?e.subtitle:'';
   document.getElementById('fNote').value = e?e.note:'';
   document.getElementById('fDate').value = e?e.date:(date||addDays(1));
-  document.getElementById('fTime').value = e?e.time:'19:30';
+  document.getElementById('fTime').value = e?(e.time||''):'19:30';
   document.getElementById('venueOpts').innerHTML = allVenues().map(function(v){ return '<option value="'+v+'">'; }).join('');
   document.getElementById('fVenue').value = e?e.venue:(allVenues()[0]||'');
-  document.getElementById('fCourt').value = e?e.court:2;
-  document.getElementById('fDur').value = e?e.dur:2;
+  document.getElementById('fRsvp').value = e&&e.rsvp?e.rsvp:'';
+  document.getElementById('fCourt').value = e?(e.court||2):2;
+  document.getElementById('fDur').value = e?(e.dur||2):2;
   var fMax=document.getElementById('fMax');
   fMax.value = e?(e.maxPlayers||(e.court||2)*4):8;
   delete fMax.dataset.touched;
   pickType(e?e.type:'mabar');
-  state.formPlayers = e?e.players.slice():[];
+  state.formPlayers = (e && e.players) ? e.players.slice() : [];
   renderPicker();
+  document.getElementById('fFlatFields').style.display = state.editingGroups ? 'none' : '';
+  document.getElementById('fGroupsNote').style.display = state.editingGroups ? '' : 'none';
   go('add');
 }
 function closeAdd(){ var back = state.editId?'jadwal':'home'; state.editId=null; go(back); }
@@ -1672,18 +1759,37 @@ function saveEvent(){
   var title=document.getElementById('fTitle').value.trim(), date=document.getElementById('fDate').value;
   if(!title){ document.getElementById('fTitle').focus(); toast('Nama acara belum diisi'); return; }
   if(!date){ document.getElementById('fDate').focus(); toast('Tanggal belum diisi'); return; }
-  var data={
+  var subtitle = document.getElementById('fSubtitle').value.trim();
+  var rsvp = document.getElementById('fRsvp').value.trim();
+  var common={
     title:title,
     note:document.getElementById('fNote').value.trim()||'Belum ada catatan dari admin.',
     date:date,
-    time:document.getElementById('fTime').value||'19:30',
+    time:document.getElementById('fTime').value||null,
     dur:Math.max(parseInt(document.getElementById('fDur').value,10)||2,1),
-    court:Math.max(parseInt(document.getElementById('fCourt').value,10)||1,1),
-    maxPlayers:Math.max(parseInt(document.getElementById('fMax').value,10)||0,1),
     venue:document.getElementById('fVenue').value.trim()||(allVenues()[0]||''),
     type:state.formType,
-    players:state.formPlayers.slice()
+    subtitle: subtitle || undefined,
+    rsvp: rsvp || undefined
   };
+  if(state.editId && state.editingGroups){
+    // Event groups (hasil import): CUMA update field dasar, JANGAN sentuh e.groups sama sekali.
+    var eg=byId(state.editId);
+    Object.keys(common).forEach(function(k){
+      if(common[k]===undefined) delete eg[k]; else eg[k]=common[k];
+    });
+    persist();
+    toast('Jadwal diperbarui');
+    state.selDate=date; state.editId=null; state.editingGroups=false;
+    go('jadwal');
+    return;
+  }
+  var data = common;
+  data.court = Math.max(parseInt(document.getElementById('fCourt').value,10)||1,1);
+  data.maxPlayers = Math.max(parseInt(document.getElementById('fMax').value,10)||0,1);
+  data.players = state.formPlayers.slice();
+  if(data.subtitle===undefined) delete data.subtitle;
+  if(data.rsvp===undefined) delete data.rsvp;
   if(state.editId){
     var e=byId(state.editId);
     Object.keys(data).forEach(function(k){ e[k]=data[k]; });
@@ -1698,7 +1804,7 @@ function saveEvent(){
     toast('Jadwal ditambahkan');
   }
   persist();
-  state.selDate=date; state.editId=null;
+  state.selDate=date; state.editId=null; state.editingGroups=false;
   go('jadwal');
 }
 
