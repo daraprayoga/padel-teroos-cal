@@ -153,6 +153,15 @@ h1.head{font-size:38px;line-height:1.06;font-weight:700;letter-spacing:-.03em;ma
 .badge.sparing{background:var(--sand-wash);color:#3f4e22}.badge.sparing i{background:var(--sand)}
 .badge.turnamen{background:var(--teal-wash);color:#28320f}.badge.turnamen i{background:var(--teal)}
 .badge.battle{background:var(--coral-wash);color:#4c5c2e}.badge.battle i{background:var(--coral)}
+.badge.done{background:rgba(92,101,81,.14);color:var(--ink-mute);margin-left:6px}
+.badge.done i{display:none}
+.badge.done svg{width:11px;height:11px}
+.card.past{opacity:.72}
+.seg2{display:inline-flex;gap:5px;background:rgba(255,255,255,.65);padding:4px;border-radius:var(--r-pill);
+  margin-bottom:13px;box-shadow:var(--sh)}
+.seg2 button{padding:8px 17px;border-radius:var(--r-pill);font-size:12.5px;font-weight:700;color:var(--ink-mute);
+  transition:background-color .16s ease,color .16s ease}
+.seg2 button.on{background:#2b3417;color:#fff}
 .card h3{margin:11px 0 0;font-size:17.5px;font-weight:700;letter-spacing:-.02em;line-height:1.25;padding-right:46px}
 .card p{margin:7px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-mute);padding-right:20px}
 .line{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12.5px;color:var(--ink-soft)}
@@ -410,6 +419,10 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
       <button class="rbtn dark adminOnly" onclick="openAdd()" aria-label="Tambah jadwal"><svg><use href="#i-plus"/></svg></button>
     </div>
     <div class="sec"><h2>Jadwal main kita</h2><button onclick="go('jadwal')">Buka kalender</button></div>
+    <div class="seg2" id="viewToggle">
+      <button class="on" data-v="upcoming" onclick="setViewMode('upcoming')">Mendatang</button>
+      <button data-v="past" onclick="setViewMode('past')">Riwayat</button>
+    </div>
     <div class="pills" id="homeFilters"></div>
     <div id="homeList" style="margin-top:14px"></div>
   </section>
@@ -637,6 +650,7 @@ var state = {
   events: initEvents,
   roster: store.get('teroos_roster', null),
   filter:'all',
+  viewMode:'upcoming',
   calFilter:'all',
   calRef:new Date(initDate+'T00:00:00'),
   selDate:initDate,
@@ -853,6 +867,8 @@ function fmtL(d){ var x=new Date(d+'T00:00:00'); return DAYL[x.getDay()]+', '+x.
 function byId(id){ for(var i=0;i<state.events.length;i++) if(state.events[i].id===id) return state.events[i]; return null; }
 function sortedEvents(){ return state.events.slice().sort(function(a,b){ return (a.date+(a.time||'00:00'))<(b.date+(b.time||'00:00'))?-1:1; }); }
 function upcoming(){ var t=addDays(0); return sortedEvents().filter(function(e){ return e.date>=t; }); }
+function isPast(e){ return e.date < addDays(0); }
+function pastEvents(){ return sortedEvents().filter(isPast).reverse(); }
 function toast(msg){
   var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('on');
   clearTimeout(el._t); el._t=setTimeout(function(){ el.classList.remove('on'); },2000);
@@ -921,9 +937,9 @@ function go(s){
 
 /* ============ HOME ============ */
 function renderHome(){
-  var up=upcoming();
-  var c={all:up.length,mabar:0,sparing:0,turnamen:0};
-  up.forEach(function(e){ var t=e.type==='battle'?'sparing':e.type; if(c[t]!==undefined) c[t]++; });
+  var list0 = state.viewMode==='past' ? pastEvents() : upcoming();
+  var c={all:list0.length,mabar:0,sparing:0,turnamen:0};
+  list0.forEach(function(e){ var t=e.type==='battle'?'sparing':e.type; if(c[t]!==undefined) c[t]++; });
   document.getElementById('homeFilters').innerHTML = ['all','mabar','sparing','turnamen'].map(function(k){
     return '<button class="pill count'+(state.filter===k?' on':'')+'" data-key="'+k+'" onclick="setFilter(\''+k+'\')">'+
       '<span class="n">'+c[k]+'</span>'+(k==='all'?'Semua':TYPE[k])+'</button>';
@@ -931,12 +947,19 @@ function renderHome(){
 
   renderHomeList();
 }
+function setViewMode(mode){
+  state.viewMode = mode;
+  document.querySelectorAll('#viewToggle button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===mode); });
+  renderHome();
+}
 function renderHomeList(){
-  var up=upcoming();
-  var list=up.filter(function(e){ var t=e.type==='battle'?'sparing':e.type; return state.filter==='all'||t===state.filter; });
+  var list0 = state.viewMode==='past' ? pastEvents() : upcoming();
+  var list=list0.filter(function(e){ var t=e.type==='battle'?'sparing':e.type; return state.filter==='all'||t===state.filter; });
   var el=document.getElementById('homeList');
   el.innerHTML = list.length ? list.map(card).join('')
-    : blank('Belum ada di filter ini','Ganti filter atau tunggu admin naikin jadwal baru.');
+    : (state.viewMode==='past'
+        ? blank('Belum ada riwayat','Sesi yang udah lewat bakal nongol di sini otomatis, ditandain Selesai.')
+        : blank('Belum ada di filter ini','Ganti filter atau tunggu admin naikin jadwal baru.'));
   reAnimate(el);
 }
 function setFilter(k){
@@ -962,8 +985,9 @@ function card(e){
     var free=cap(e)-e.players.length;
     right = '<span class="act '+(free>0?'quiet':e.type)+'">'+(free>0 ? (free>12 ? e.players.length+'/'+cap(e)+' pemain' : free+' slot kosong') : 'Full '+e.players.length+' pemain')+'</span>';
   }
-  return '<button class="card" onclick="openDetail(\''+e.id+'\')">'+
-    '<span class="badge '+(e.type==='battle'?'sparing':e.type)+'"><i></i>'+TYPE[e.type]+'</span>'+
+  var doneBadge = isPast(e) ? '<span class="badge done">'+ic('i-check','width:11px;height:11px')+'Selesai</span>' : '';
+  return '<button class="card'+(isPast(e)?' past':'')+'" onclick="openDetail(\''+e.id+'\')">'+
+    '<span class="badge '+(e.type==='battle'?'sparing':e.type)+'"><i></i>'+TYPE[e.type]+'</span>'+doneBadge+
     '<span class="open">'+ic('i-open')+'</span>'+
     '<h3>'+e.title+'</h3>'+
     (e.subtitle ? '<p class="sub">'+e.subtitle+'</p>' : '')+
@@ -1447,6 +1471,7 @@ function openDetail(id){
   var timeLine = e.time ? fmtL(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtL(e.date)+' · jam menyusul';
   var body =
     '<span class="badge '+(e.type==='battle'?'sparing':e.type)+'"><i></i>'+TYPE[e.type]+'</span>'+
+    (isPast(e) ? '<span class="badge done">'+ic('i-check','width:11px;height:11px')+'Selesai</span>' : '')+
     '<h2>'+e.title+'</h2>'+
     (e.subtitle ? '<p class="sub" style="padding-right:0;font-size:13.5px;margin:0 0 2px">'+e.subtitle+'</p>' : '')+
     '<div class="line">'+ic('i-clock')+timeLine+'</div>'+
