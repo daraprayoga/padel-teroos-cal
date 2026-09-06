@@ -651,7 +651,7 @@ function seed(){
 
 var initEvents = store.get('teroos_events', null) || seed();
 var initUp = initEvents.slice().sort(function(a,b){ return (a.date+(a.time||'00:00'))<(b.date+(b.time||'00:00'))?-1:1; })
-  .filter(function(e){ return e.date>=addDays(0); });
+  .filter(function(e){ return !isPast(e); });
 var initDate = initUp.length ? initUp[0].date : addDays(0);
 
 var state = {
@@ -947,8 +947,19 @@ function fmtS(d){ var x=new Date(d+'T00:00:00'); return DAY[x.getDay()]+', '+x.g
 function fmtL(d){ var x=new Date(d+'T00:00:00'); return DAYL[x.getDay()]+', '+x.getDate()+' '+MON[x.getMonth()]; }
 function byId(id){ for(var i=0;i<state.events.length;i++) if(state.events[i].id===id) return state.events[i]; return null; }
 function sortedEvents(){ return state.events.slice().sort(function(a,b){ return (a.date+(a.time||'00:00'))<(b.date+(b.time||'00:00'))?-1:1; }); }
-function upcoming(){ var t=addDays(0); return sortedEvents().filter(function(e){ return e.date>=t; }); }
-function isPast(e){ return e.date < addDays(0); }
+function eventEndMoment(e){
+  var d = new Date(e.date+'T00:00:00');
+  if(e.time){
+    var p = e.time.split(':');
+    d.setHours(parseInt(p[0],10), parseInt(p[1],10), 0, 0);
+    d.setTime(d.getTime() + (e.dur||2)*3600000);
+  } else {
+    d.setHours(23,59,59,999);
+  }
+  return d;
+}
+function upcoming(){ var now=Date.now(); return sortedEvents().filter(function(e){ return eventEndMoment(e).getTime()>now; }); }
+function isPast(e){ return eventEndMoment(e).getTime() <= Date.now(); }
 function pastEvents(){ return sortedEvents().filter(isPast).reverse(); }
 function toast(msg){
   var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('on');
