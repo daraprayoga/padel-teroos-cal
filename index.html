@@ -826,14 +826,14 @@ function ava(n,c){ return '<span class="a '+(c||'')+'" style="background:'+col(n
 function ic(id,st){ return '<svg'+(st?' style="'+st+'"':'')+'><use href="#'+id+'"/></svg>'; }
 function endT(t,d){ var p=t.split(':'); return String((parseInt(p[0],10)+d)%24).padStart(2,'0')+':'+p[1]; }
 function cap(e){ return e.maxPlayers || ((e.court||1)*4); }
-function entryNames(en){ return en.split(/\s*-\s*/).map(function(s){ return s.trim(); }); }
+function entryNames(en){ return String(en==null?'':en).split(/\s*-\s*/).map(function(s){ return s.trim(); }).filter(Boolean); }
 function peopleList(e){
-  if(e.groups){
+  if(e && e.groups){
     var set={};
-    e.groups.forEach(function(g){ g.entries.forEach(function(en){ entryNames(en).forEach(function(n){ if(n && n!=='TBC') set[n]=1; }); }); });
+    (e.groups||[]).forEach(function(g){ (g&&g.entries||[]).forEach(function(en){ entryNames(en).forEach(function(n){ if(n && n!=='TBC') set[n]=1; }); }); });
     return Object.keys(set);
   }
-  return e.players.slice();
+  return (e && e.players) ? e.players.slice() : [];
 }
 function peopleCount(e){ return peopleList(e).length; }
 function allRoster(){
@@ -842,7 +842,7 @@ function allRoster(){
 }
 function allVenues(){
   var set={};
-  state.events.forEach(function(e){ if(e.venue) set[e.venue]=1; });
+  state.events.forEach(function(e){ if(e && e.venue) set[e.venue]=1; });
   return Object.keys(set).sort();
 }
 function avaOrTbc(n){ return n==='TBC' ? '<span class="a tbc">?</span>' : ava(n); }
@@ -854,24 +854,26 @@ function personPill(n){
 }
 function chipEntry(en){
   var names = entryNames(en);
+  if(!names.length) return '';
   if(names.length>1) return '<span class="duo">'+names.map(personPill).join('<i class="amp">&amp;</i>')+'</span>';
   return personPill(names[0]);
 }
 function groupStats(g){
   var total=0, conf=0;
-  g.entries.forEach(function(en){ entryNames(en).forEach(function(n){ total++; if(n!=='TBC') conf++; }); });
+  (g&&g.entries||[]).forEach(function(en){ entryNames(en).forEach(function(n){ total++; if(n!=='TBC') conf++; }); });
   return {total:total, conf:conf};
 }
 function eventStats(e){
   var total=0, conf=0;
-  (e.groups||[]).forEach(function(g){ var s=groupStats(g); total+=s.total; conf+=s.conf; });
+  (e&&e.groups||[]).forEach(function(g){ var s=groupStats(g); total+=s.total; conf+=s.conf; });
   return {total:total, conf:conf};
 }
 function groupsHtml(e){
-  return e.groups.map(function(g){
+  return (e&&e.groups||[]).map(function(g){
+    if(!g) return '';
     var s=groupStats(g);
-    return '<div class="court"><div class="courth"><b>'+g.label+'</b><span>'+s.conf+'/'+s.total+' confirmed</span></div>'+
-      '<div class="chips">'+g.entries.map(chipEntry).join('')+'</div></div>';
+    return '<div class="court"><div class="courth"><b>'+(g.label||'Kategori')+'</b><span>'+s.conf+'/'+s.total+' confirmed</span></div>'+
+      '<div class="chips">'+(g.entries||[]).map(chipEntry).join('')+'</div></div>';
   }).join('');
 }
 function escapeAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
@@ -948,10 +950,10 @@ function fmtL(d){ var x=new Date(d+'T00:00:00'); return DAYL[x.getDay()]+', '+x.
 function byId(id){ for(var i=0;i<state.events.length;i++) if(state.events[i].id===id) return state.events[i]; return null; }
 function sortedEvents(){ return state.events.slice().sort(function(a,b){ return (a.date+(a.time||'00:00'))<(b.date+(b.time||'00:00'))?-1:1; }); }
 function eventEndMoment(e){
-  var d = new Date(e.date+'T00:00:00');
-  if(e.time){
-    var p = e.time.split(':');
-    d.setHours(parseInt(p[0],10), parseInt(p[1],10), 0, 0);
+  var d = new Date((e&&e.date?e.date:'1970-01-01')+'T00:00:00');
+  if(e && e.time){
+    var p = String(e.time).split(':');
+    d.setHours(parseInt(p[0],10)||0, parseInt(p[1],10)||0, 0, 0);
     d.setTime(d.getTime() + (e.dur||2)*3600000);
   } else {
     d.setHours(23,59,59,999);
@@ -1014,10 +1016,15 @@ function go(s){
   document.getElementById('tabbar').classList.toggle('hide', s==='add');
   window.scrollTo(0,0);
   function paint(){
-    if(s==='home'){ ensureRoster(); renderHome(); }
-    if(s==='jadwal') renderJadwal();
-    if(s==='lineup') renderLineup();
-    if(s==='club') renderClub();
+    try{
+      if(s==='home'){ ensureRoster(); renderHome(); }
+      if(s==='jadwal') renderJadwal();
+      if(s==='lineup') renderLineup();
+      if(s==='club') renderClub();
+    }catch(err){
+      console.error('render screen gagal:', s, err);
+      toast('Ada yang gagal ke-render, coba reload halaman');
+    }
   }
   // Quiet refresh from cloud when navigating (so member always sees latest)
   if(getSyncId() && s!=='add'){
@@ -1061,33 +1068,39 @@ function setFilter(k){
 }
 
 function card(e){
-  var people=peopleList(e), extra=Math.max(people.length-3,0);
-  var stack=people.slice(0,3).map(function(p){ return ava(p); }).join('')+(extra?'<span class="a more">+'+extra+'</span>':'');
-  var timeLine = e.time ? fmtS(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtS(e.date)+' · jam menyusul';
-  var extraLine = '', right;
-  if(e.groups){
-    var st=eventStats(e);
-    extraLine = '<div class="line">'+ic('i-check')+st.conf+'/'+st.total+' confirmed</div>';
-    right = e.rsvp
-      ? '<a class="act '+e.type+'" href="'+e.rsvp+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+ic('i-link')+'RSVP</a>'
-      : '<span class="act quiet">Lihat lineup</span>';
-  } else if(e.rsvp){
-    right = '<a class="act '+e.type+'" href="'+e.rsvp+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+ic('i-link')+'RSVP</a>';
-  } else {
-    var free=cap(e)-e.players.length;
-    right = '<span class="act '+(free>0?'quiet':e.type)+'">'+(free>0 ? (free>12 ? e.players.length+'/'+cap(e)+' pemain' : free+' slot kosong') : 'Full '+e.players.length+' pemain')+'</span>';
+  try{
+    var people=peopleList(e), extra=Math.max(people.length-3,0);
+    var stack=people.slice(0,3).map(function(p){ return ava(p); }).join('')+(extra?'<span class="a more">+'+extra+'</span>':'');
+    var timeLine = e.time ? fmtS(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtS(e.date)+' · jam menyusul';
+    var extraLine = '', right;
+    if(e.groups && e.groups.length){
+      var st=eventStats(e);
+      extraLine = '<div class="line">'+ic('i-check')+st.conf+'/'+st.total+' confirmed</div>';
+      right = e.rsvp
+        ? '<a class="act '+e.type+'" href="'+e.rsvp+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+ic('i-link')+'RSVP</a>'
+        : '<span class="act quiet">Lihat lineup</span>';
+    } else if(e.rsvp){
+      right = '<a class="act '+e.type+'" href="'+e.rsvp+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+ic('i-link')+'RSVP</a>';
+    } else {
+      var playersArr = e.players||[];
+      var free=cap(e)-playersArr.length;
+      right = '<span class="act '+(free>0?'quiet':e.type)+'">'+(free>0 ? (free>12 ? playersArr.length+'/'+cap(e)+' pemain' : free+' slot kosong') : 'Full '+playersArr.length+' pemain')+'</span>';
+    }
+    var doneBadge = isPast(e) ? '<span class="badge done">'+ic('i-check','width:11px;height:11px')+'Selesai</span>' : '';
+    return '<button class="card'+(isPast(e)?' past':'')+'" onclick="openDetail(\''+e.id+'\')">'+
+      '<span class="badge '+(e.type==='battle'?'sparing':(e.type||'mabar'))+'"><i></i>'+(TYPE[e.type]||e.type||'Sesi')+'</span>'+doneBadge+
+      '<span class="open">'+ic('i-open')+'</span>'+
+      '<h3>'+(e.title||'(tanpa judul)')+'</h3>'+
+      (e.subtitle ? '<p class="sub">'+e.subtitle+'</p>' : '')+
+      '<div class="line">'+ic('i-clock')+timeLine+'</div>'+
+      '<div class="line">'+ic('i-pin')+(e.venue||'-')+(e.capMeta ? ' · '+e.capMeta : '')+'</div>'+
+      extraLine+
+      '<div class="foot"><span class="stack">'+stack+'</span>'+right+'</div>'+
+    '</button>';
+  }catch(err){
+    console.error('card() gagal render event', e && e.id, err);
+    return '<div class="card" style="color:var(--ink-mute)">'+ic('i-info')+' Ada 1 sesi yang datanya gak kebaca ('+(e&&e.id||'?')+'). Cek Club &gt; status sync, atau kontak admin.</div>';
   }
-  var doneBadge = isPast(e) ? '<span class="badge done">'+ic('i-check','width:11px;height:11px')+'Selesai</span>' : '';
-  return '<button class="card'+(isPast(e)?' past':'')+'" onclick="openDetail(\''+e.id+'\')">'+
-    '<span class="badge '+(e.type==='battle'?'sparing':e.type)+'"><i></i>'+TYPE[e.type]+'</span>'+doneBadge+
-    '<span class="open">'+ic('i-open')+'</span>'+
-    '<h3>'+e.title+'</h3>'+
-    (e.subtitle ? '<p class="sub">'+e.subtitle+'</p>' : '')+
-    '<div class="line">'+ic('i-clock')+timeLine+'</div>'+
-    '<div class="line">'+ic('i-pin')+e.venue+(e.capMeta ? ' · '+e.capMeta : '')+'</div>'+
-    extraLine+
-    '<div class="foot"><span class="stack">'+stack+'</span>'+right+'</div>'+
-  '</button>';
 }
 function blank(t,m,btn){ return '<div class="empty">'+ic('i-cal')+'<b>'+t+'</b><p>'+m+'</p>'+(btn||'')+'</div>'; }
 
@@ -1190,6 +1203,7 @@ function renderMonth(){
 }
 function slotOf(t){ if(!t) return 'pagi'; var h=parseInt(t.split(':')[0],10); return h<11?'pagi':(h<17?'sore':'malam'); }
 function renderAgenda(){
+  try{
   var evs=state.events.filter(function(e){ return e.date===state.selDate; })
     .filter(function(e){ var t=e.type==='battle'?'sparing':e.type; return state.calFilter==='all'||t===state.calFilter; })
     .sort(function(a,b){ return a.time<b.time?-1:1; });
@@ -1218,6 +1232,11 @@ function renderAgenda(){
   var el=document.getElementById('agenda');
   el.innerHTML = html;
   reAnimate(el);
+  }catch(err){
+    console.error('renderAgenda gagal', err);
+    var el2=document.getElementById('agenda');
+    if(el2) el2.innerHTML = blank('Gagal nampilin sesi', 'Ada error pas render tanggal ini. Coba pindah tanggal lain atau reload halaman.');
+  }
 }
 
 /* ============ LINEUP ============ */
@@ -1881,14 +1900,18 @@ function startApp(fromCloud){
   // Auto-refresh dari cloud tiap 20 detik (member selalu dapat update admin)
   if(getSyncConfig()){
     setInterval(function(){
-      if(state.screen==='add' || state.pairEdit) return;
+      if(state.screen==='add' || state.pairEdit || state.groupsEdit) return;
       cloudPull().then(function(status){
         if(status!=='ok') return; // 'error' atau 'empty' → jangan sentuh state lokal yang lagi ditampilin
-        ensureRoster();
-        if(state.screen==='home') renderHome();
-        else if(state.screen==='jadwal') renderJadwal();
-        else if(state.screen==='lineup') renderLineup();
-        else if(state.screen==='club') renderClub();
+        try{
+          ensureRoster();
+          if(state.screen==='home') renderHome();
+          else if(state.screen==='jadwal') renderJadwal();
+          else if(state.screen==='lineup') renderLineup();
+          else if(state.screen==='club') renderClub();
+        }catch(err){
+          console.error('auto-refresh render gagal', err);
+        }
       });
     }, 20000);
   }
