@@ -1584,15 +1584,17 @@ function gcalUrl(e){
 
 function openDetail(id){
   var e=byId(id);
+  if(!e){ toast('Sesi gak ketemu'); return; }
+  try{
   var timeLine = e.time ? fmtL(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtL(e.date)+' · jam menyusul';
   var body =
-    '<span class="badge '+(e.type==='battle'?'sparing':e.type)+'"><i></i>'+TYPE[e.type]+'</span>'+
+    '<span class="badge '+(e.type==='battle'?'sparing':(e.type||'mabar'))+'"><i></i>'+(TYPE[e.type]||e.type||'Sesi')+'</span>'+
     (isPast(e) ? '<span class="badge done">'+ic('i-check','width:11px;height:11px')+'Selesai</span>' : '')+
-    '<h2>'+e.title+'</h2>'+
+    '<h2>'+(e.title||'(tanpa judul)')+'</h2>'+
     (e.subtitle ? '<p class="sub" style="padding-right:0;font-size:13.5px;margin:0 0 2px">'+e.subtitle+'</p>' : '')+
     '<div class="line">'+ic('i-clock')+timeLine+'</div>'+
-    '<div class="line">'+ic('i-pin')+e.venue+(e.capMeta?' · '+e.capMeta:(e.court?' · '+e.court+' court':''))+'</div>'+
-    '<p style="font-size:14px;line-height:1.55;color:var(--ink-soft);margin:15px 0 0">'+e.note+'</p>';
+    '<div class="line">'+ic('i-pin')+(e.venue||'-')+(e.capMeta?' · '+e.capMeta:(e.court?' · '+e.court+' court':''))+'</div>'+
+    '<p style="font-size:14px;line-height:1.55;color:var(--ink-soft);margin:15px 0 0">'+(e.note||'')+'</p>';
 
   if(e.rsvp){
     body += '<a class="cta" style="display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;text-decoration:none" href="'+e.rsvp+'" target="_blank" rel="noopener">'+ic('i-link','width:18px;height:18px')+'Buka RSVP</a>';
@@ -1610,9 +1612,10 @@ function openDetail(id){
         '<button class="act" style="margin-top:12px;width:100%;justify-content:center" onclick="openGroupsPairEdit(\''+e.id+'\')">'+ic('i-users')+'Ubah pasangan</button>'
       : '<button class="cta" style="margin-top:22px" onclick="shareEvent(\''+e.id+'\')">Salin info sesi</button>';
   } else {
-    var free=cap(e)-e.players.length;
-    var confCount = e.players.filter(function(p){ return p && p !== 'TBC'; }).length;
-    var totalPlayers = e.players.length;
+    var playersArr = e.players||[];
+    var free=cap(e)-playersArr.length;
+    var confCount = playersArr.filter(function(p){ return p && p !== 'TBC'; }).length;
+    var totalPlayers = playersArr.length;
     var np = normalizePairs(e);
     var lineup;
     if(np && np.list.length){
@@ -1634,9 +1637,9 @@ function openDetail(id){
     }
     var capN=cap(e);
     var freeLabel = free<=0 ? '' : (free>12 ? ' · max '+capN : ' · '+free+' kosong');
-    body += '<div class="lbl">Yang ikut ('+e.players.length+'/'+capN+freeLabel+')</div>'+
+    body += '<div class="lbl">Yang ikut ('+playersArr.length+'/'+capN+freeLabel+')</div>'+
       '<div class="confirmed-summary">'+ic('i-check')+' '+confCount+' dari '+totalPlayers+' pemain sudah confirmed</div>'+
-      '<div class="chips">'+e.players.map(function(p){
+      '<div class="chips">'+playersArr.map(function(p){
         var isConf = p && p !== 'TBC';
         return '<span class="chip'+(isConf?'':' pend')+'">'+avaOrTbc(p)+p+
           (isConf ? ic('i-check','width:13px;height:13px') : ic('i-clock','width:13px;height:13px'))+
@@ -1653,6 +1656,15 @@ function openDetail(id){
 
   document.getElementById('sheetBody').innerHTML = body;
   openSheet();
+  }catch(err){
+    console.error('openDetail gagal render', id, err);
+    document.getElementById('sheetBody').innerHTML =
+      '<h2>'+(e.title||'Sesi')+'</h2>'+
+      '<div class="note">'+ic('i-info')+'<span>Ada bagian dari sesi ini yang gagal ditampilin (data mungkin gak lengkap). '+
+      (state.admin ? 'Bisa dihapus dan dibikin ulang kalau perlu.' : 'Kontak admin buat cek datanya.')+'</span></div>'+
+      (state.admin ? '<button class="cta ghost" style="margin-top:16px" onclick="removeEvent(\''+id+'\')">Hapus sesi ini</button>' : '');
+    openSheet();
+  }
 }
 function shareEvent(id){
   var e=byId(id);
