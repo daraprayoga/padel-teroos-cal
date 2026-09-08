@@ -1152,23 +1152,27 @@ function marks(key){
   var evs=state.events.filter(function(e){ return e.date===key; });
   return evs.slice(0,3).map(function(e){ return '<i class="'+e.type+'"></i>'; }).join('');
 }
-function updateStripSelection(k){
-  var el=document.getElementById('dayStrip');
-  var on=null;
-  el.querySelectorAll('.dchip').forEach(function(c){
-    var match = c.dataset.date===k;
-    c.classList.toggle('on', match);
-    if(match) on=c;
-  });
-  if(on && on.scrollIntoView){
-    try{ on.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(err){}
+function syncCalSelection(){
+  var k=state.selDate;
+  var strip=document.getElementById('dayStrip');
+  if(strip){
+    var on=null;
+    strip.querySelectorAll('.dchip').forEach(function(c){
+      var match=c.dataset.date===k;
+      c.classList.toggle('on', match);
+      if(match) on=c;
+    });
+    if(on && on.scrollIntoView){
+      try{ on.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(err){}
+    }
+  }
+  var grid=document.getElementById('calGrid');
+  if(grid){
+    grid.querySelectorAll('.cell').forEach(function(c){ c.classList.toggle('on', c.dataset.date===k); });
   }
 }
-function updateGridSelection(k){
-  document.getElementById('calGrid').querySelectorAll('.cell').forEach(function(c){
-    c.classList.toggle('on', c.dataset.date===k);
-  });
-}
+function updateStripSelection(k){ syncCalSelection(); }
+function updateGridSelection(k){ syncCalSelection(); }
 function renderStrip(){
   var base=new Date(); base.setDate(base.getDate()-1);
   var html='', today=addDays(0);
@@ -1204,6 +1208,7 @@ function renderMonth(){
 function slotOf(t){ if(!t) return 'pagi'; var h=parseInt(t.split(':')[0],10); return h<11?'pagi':(h<17?'sore':'malam'); }
 function renderAgenda(){
   try{
+  syncCalSelection();
   var evs=state.events.filter(function(e){ return e.date===state.selDate; })
     .filter(function(e){ var t=e.type==='battle'?'sparing':e.type; return state.calFilter==='all'||t===state.calFilter; })
     .sort(function(a,b){ return a.time<b.time?-1:1; });
