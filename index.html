@@ -264,6 +264,11 @@ a.act{text-decoration:none}
 .chip svg{width:13px;height:13px;color:var(--matcha);flex:none}
 .chip.pend{background:rgba(255,255,255,.45);border-style:dashed;color:var(--ink-mute)}
 .chip.pend svg{color:var(--ink-mute)}
+.chipWrap{display:inline-flex;align-items:center;gap:3px}
+.chipEdit{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.7);
+  display:grid;place-items:center;color:var(--ink-mute);flex:none;padding:0}
+.chipEdit svg{width:12px;height:12px;color:var(--ink-mute)}
+.chipEdit:active{background:var(--matcha-wash)}
 .confirmed-summary{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--matcha);margin:0 0 10px}
 .confirmed-summary svg{width:14px;height:14px;color:var(--matcha)}
 .backup-row{display:flex;gap:10px;flex-wrap:wrap}
@@ -404,6 +409,7 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
 <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 5 14h5.5L9.5 22l9-13H13l1-7Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.2 4.2 0 0 0 6 0l3-3a4.2 4.2 0 0 0-6-6l-1.5 1.5M14 10a4.2 4.2 0 0 0-6 0l-3 3a4.2 4.2 0 0 0 6 6l1.5-1.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4.2L19.4 8.8a2.1 2.1 0 0 0 0-3L18.2 4.6a2.1 2.1 0 0 0-3 0L4 15.8V20Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 6.8l3.2 3.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 </defs></svg>
 
 <main id="app">
@@ -531,9 +537,14 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
     <textarea class="field" id="fNote" placeholder="Format Americano individu, kumpul 15 menit sebelum main."></textarea>
     <div class="lbl">Tanggal &amp; jam</div>
     <div class="two">
-      <div class="field ico"><svg><use href="#i-cal"/></svg><input type="date" id="fDate"></div>
+      <div class="field ico"><svg><use href="#i-cal"/></svg><input type="date" id="fDate" onchange="syncEndDateMin()"></div>
       <div class="field ico"><svg><use href="#i-clock"/></svg><input type="time" id="fTime" value="19:30"></div>
     </div>
+    <label style="display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13px;color:var(--ink-soft);cursor:pointer">
+      <input type="checkbox" id="fMultiDay" onchange="toggleMultiDay()" style="width:17px;height:17px;accent-color:var(--matcha);flex:none">
+      Lanjut ke hari berikutnya (turnamen multi-hari)
+    </label>
+    <div class="field ico" id="fEndDateWrap" style="display:none;margin-top:8px"><svg><use href="#i-cal"/></svg><input type="date" id="fEndDate"></div>
     <div class="lbl">Tipe sesi</div>
     <div class="seg" id="fType">
       <button data-t="mabar" class="on" onclick="pickType('mabar')">Mabar</button>
@@ -947,9 +958,27 @@ function renderGroupsEditor(){
 }
 function fmtS(d){ var x=new Date(d+'T00:00:00'); return DAY[x.getDay()]+', '+x.getDate()+' '+MON[x.getMonth()].slice(0,3); }
 function fmtL(d){ var x=new Date(d+'T00:00:00'); return DAYL[x.getDay()]+', '+x.getDate()+' '+MON[x.getMonth()]; }
+function hasRange(e){ return !!(e && e.endDate && e.endDate > e.date); }
+function eventDates(e){
+  if(!e || !e.date) return [];
+  if(!hasRange(e)) return [e.date];
+  var out=[], d=new Date(e.date+'T00:00:00'), end=new Date(e.endDate+'T00:00:00'), guard=0;
+  while(d<=end && guard<60){ out.push(iso(d)); d.setDate(d.getDate()+1); guard++; }
+  return out;
+}
+function dateRangeLabel(e, fmtFn){
+  return hasRange(e) ? fmtFn(e.date)+' s/d '+fmtFn(e.endDate) : fmtFn(e.date);
+}
 function byId(id){ for(var i=0;i<state.events.length;i++) if(state.events[i].id===id) return state.events[i]; return null; }
 function sortedEvents(){ return state.events.slice().sort(function(a,b){ return (a.date+(a.time||'00:00'))<(b.date+(b.time||'00:00'))?-1:1; }); }
 function eventEndMoment(e){
+  if(hasRange(e)){
+    // sesi multi-hari: jam+durasi cuma berlaku buat hari pertama, jadi selesainya dipatok
+    // akhir hari terakhir (23:59:59) terlepas ada jam mulai atau nggak
+    var dEnd = new Date(e.endDate+'T00:00:00');
+    dEnd.setHours(23,59,59,999);
+    return dEnd;
+  }
   var d = new Date((e&&e.date?e.date:'1970-01-01')+'T00:00:00');
   if(e && e.time){
     var p = String(e.time).split(':');
@@ -1071,7 +1100,9 @@ function card(e){
   try{
     var people=peopleList(e), extra=Math.max(people.length-3,0);
     var stack=people.slice(0,3).map(function(p){ return ava(p); }).join('')+(extra?'<span class="a more">+'+extra+'</span>':'');
-    var timeLine = e.time ? fmtS(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtS(e.date)+' · jam menyusul';
+    var timeLine = hasRange(e)
+      ? dateRangeLabel(e,fmtS)+(e.time?' · mulai '+e.time:'')
+      : (e.time ? fmtS(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtS(e.date)+' · jam menyusul');
     var extraLine = '', right;
     if(e.groups && e.groups.length){
       var st=eventStats(e);
@@ -1149,7 +1180,7 @@ function renderJadwal(){
   renderAgenda();
 }
 function marks(key){
-  var evs=state.events.filter(function(e){ return e.date===key; });
+  var evs=state.events.filter(function(e){ return eventDates(e).indexOf(key)>-1; });
   return evs.slice(0,3).map(function(e){ return '<i class="'+e.type+'"></i>'; }).join('');
 }
 function syncCalSelection(){
@@ -1209,7 +1240,7 @@ function slotOf(t){ if(!t) return 'pagi'; var h=parseInt(t.split(':')[0],10); re
 function renderAgenda(){
   try{
   syncCalSelection();
-  var evs=state.events.filter(function(e){ return e.date===state.selDate; })
+  var evs=state.events.filter(function(e){ return eventDates(e).indexOf(state.selDate)>-1; })
     .filter(function(e){ var t=e.type==='battle'?'sparing':e.type; return state.calFilter==='all'||t===state.calFilter; })
     .sort(function(a,b){ return a.time<b.time?-1:1; });
   var head='<div class="sec"><h2>'+fmtL(state.selDate)+'</h2><span class="muted">'+
@@ -1564,14 +1595,20 @@ function gcalUrl(e){
   var details = e.note || '';
   if(e.rsvp) details += (details?'\n\n':'')+'RSVP: '+e.rsvp;
   var datesParam;
+  var lastDay = hasRange(e) ? e.endDate : e.date;
   if(e.time){
     var start = new Date(e.date+'T'+e.time+':00+07:00');
-    var end = new Date(start.getTime() + (e.dur||2)*3600000);
+    var end;
+    if(hasRange(e)){
+      end = new Date(lastDay+'T00:00:00+07:00'); end.setDate(end.getDate()+1); // tengah malam abis hari terakhir
+    } else {
+      end = new Date(start.getTime() + (e.dur||2)*3600000);
+    }
     var fmt = function(d){ return d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'; };
     datesParam = fmt(start)+'/'+fmt(end);
   } else {
     var d0 = e.date.replace(/-/g,'');
-    var end2 = new Date(e.date+'T00:00:00+07:00'); end2.setDate(end2.getDate()+1);
+    var end2 = new Date(lastDay+'T00:00:00+07:00'); end2.setDate(end2.getDate()+1);
     var d1 = end2.getFullYear()+pad2(end2.getMonth()+1)+pad2(end2.getDate());
     datesParam = d0+'/'+d1;
   }
@@ -1586,7 +1623,9 @@ function openDetail(id){
   var e=byId(id);
   if(!e){ toast('Sesi gak ketemu'); return; }
   try{
-  var timeLine = e.time ? fmtL(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtL(e.date)+' · jam menyusul';
+  var timeLine = hasRange(e)
+    ? dateRangeLabel(e,fmtL)+(e.time?' · mulai '+e.time:'')
+    : (e.time ? fmtL(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtL(e.date)+' · jam menyusul');
   var body =
     '<span class="badge '+(e.type==='battle'?'sparing':(e.type||'mabar'))+'"><i></i>'+(TYPE[e.type]||e.type||'Sesi')+'</span>'+
     (isPast(e) ? '<span class="badge done">'+ic('i-check','width:11px;height:11px')+'Selesai</span>' : '')+
@@ -1668,8 +1707,8 @@ function openDetail(id){
 }
 function shareEvent(id){
   var e=byId(id);
-  var when = e.time ? e.time+(e.dur?'-'+endT(e.time,e.dur):'') : 'jam menyusul';
-  var txt = e.title+'\n'+fmtL(e.date)+' · '+when+'\n'+e.venue+
+  var when = hasRange(e) ? (e.time?'mulai '+e.time:'jam menyusul') : (e.time ? e.time+(e.dur?'-'+endT(e.time,e.dur):'') : 'jam menyusul');
+  var txt = e.title+'\n'+dateRangeLabel(e,fmtL)+' · '+when+'\n'+e.venue+
     (e.rsvp?'\nRSVP: '+e.rsvp:'')+'\n'+e.note+'\nPeserta: '+peopleList(e).join(', ');
   var done=function(){ toast('Info sesi disalin'); };
   if(navigator.clipboard && navigator.clipboard.writeText){
@@ -1700,6 +1739,11 @@ function openAdd(id, date){
   document.getElementById('fNote').value = e?e.note:'';
   document.getElementById('fDate').value = e?e.date:(date||addDays(1));
   document.getElementById('fTime').value = e?(e.time||''):'19:30';
+  var isRange = hasRange(e);
+  document.getElementById('fMultiDay').checked = isRange;
+  document.getElementById('fEndDateWrap').style.display = isRange ? '' : 'none';
+  document.getElementById('fEndDate').value = isRange ? e.endDate : '';
+  document.getElementById('fEndDate').min = document.getElementById('fDate').value;
   document.getElementById('venueOpts').innerHTML = allVenues().map(function(v){ return '<option value="'+v+'">'; }).join('');
   document.getElementById('fVenue').value = e?e.venue:(allVenues()[0]||'');
   document.getElementById('fRsvp').value = e&&e.rsvp?e.rsvp:'';
@@ -1720,15 +1764,49 @@ function pickType(t){
   state.formType=t;
   document.querySelectorAll('#fType button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
 }
+function syncEndDateMin(){
+  var d=document.getElementById('fDate').value;
+  var endInput=document.getElementById('fEndDate');
+  if(!d) return;
+  endInput.min = d;
+  if(endInput.value && endInput.value < d) endInput.value = d;
+}
+function toggleMultiDay(){
+  var on = document.getElementById('fMultiDay').checked;
+  var wrap = document.getElementById('fEndDateWrap');
+  wrap.style.display = on ? '' : 'none';
+  if(!on) return;
+  var d = document.getElementById('fDate').value || addDays(1);
+  var endInput = document.getElementById('fEndDate');
+  endInput.min = d;
+  if(!endInput.value || endInput.value<=d){
+    var nd=new Date(d+'T00:00:00'); nd.setDate(nd.getDate()+1);
+    endInput.value = iso(nd);
+  }
+}
 function renderPicker(){
   var names = allRoster().slice();
   state.formPlayers.forEach(function(p){ if(names.indexOf(p)<0) names.push(p); });
   names.sort(function(a,b){ return a.localeCompare(b); });
   document.getElementById('fRoster').innerHTML = names.map(function(p){
     var on = state.formPlayers.indexOf(p)>-1;
-    return '<button class="chip'+(on?'':' off')+'" onclick="togglePlayer(\''+p.replace(/'/g,"\\'")+'\')">'+
+    var esc = p.replace(/'/g,"\\'");
+    var chip = '<button class="chip'+(on?'':' off')+'" onclick="togglePlayer(\''+esc+'\')">'+
       (on?ava(p):'')+p+(on?'<span class="x">'+ic('i-close')+'</span>':'')+'</button>';
+    if(!on) return chip;
+    // chip terpisah dari tombol pencil: cuma typo nama (bukan ganti orang) lewat sini,
+    // biar pairing yang udah disusun gak ikut keubah/ilang gara-gara dianggap orang beda
+    return '<span class="chipWrap">'+chip+
+      '<button class="chipEdit" type="button" title="Ada typo? Ubah nama" aria-label="Ubah nama '+esc+'" onclick="renamePlayerInline(\''+esc+'\',event)">'+ic('i-edit')+'</button></span>';
   }).join('');
+}
+function renamePlayerInline(oldName, evt){
+  if(evt){ evt.preventDefault(); evt.stopPropagation(); }
+  var neu = renamePlayer(oldName);
+  if(!neu) return;
+  var i = state.formPlayers.indexOf(oldName);
+  if(i>-1) state.formPlayers[i] = neu;
+  renderPicker();
 }
 function togglePlayer(p){
   var i=state.formPlayers.indexOf(p);
@@ -1761,11 +1839,11 @@ function addClubPlayer(){
   toast(name+' ditambahkan ke roster');
 }
 function renamePlayer(oldName){
-  if(!state.admin){ toast('Cuma admin yang bisa ubah'); return; }
+  if(!state.admin){ toast('Cuma admin yang bisa ubah'); return null; }
   var neu = prompt('Ubah nama pemain:', oldName);
-  if(neu===null) return;
+  if(neu===null) return null;
   neu = neu.trim();
-  if(!neu || neu===oldName) return;
+  if(!neu || neu===oldName) return null;
   ensureRoster();
   state.events.forEach(function(e){
     if(e.players) e.players = e.players.map(function(p){ return p===oldName ? neu : p; });
@@ -1791,6 +1869,7 @@ function renamePlayer(oldName){
   renderClub();
   renderHome();
   toast(oldName+' → '+neu);
+  return neu;
 }
 function removeFromRoster(name){
   if(!state.admin){ toast('Cuma admin yang bisa ubah'); return; }
@@ -1806,12 +1885,20 @@ function saveEvent(){
   var title=document.getElementById('fTitle').value.trim(), date=document.getElementById('fDate').value;
   if(!title){ document.getElementById('fTitle').focus(); toast('Nama acara belum diisi'); return; }
   if(!date){ document.getElementById('fDate').focus(); toast('Tanggal belum diisi'); return; }
+  var multiDay = document.getElementById('fMultiDay').checked;
+  var endDateRaw = document.getElementById('fEndDate').value;
+  if(multiDay && (!endDateRaw || endDateRaw<=date)){
+    document.getElementById('fEndDate').focus();
+    toast('Tanggal selesai harus setelah tanggal mulai');
+    return;
+  }
   var subtitle = document.getElementById('fSubtitle').value.trim();
   var rsvp = document.getElementById('fRsvp').value.trim();
   var common={
     title:title,
     note:document.getElementById('fNote').value.trim()||'Belum ada catatan dari admin.',
     date:date,
+    endDate: multiDay ? endDateRaw : undefined,
     time:document.getElementById('fTime').value||null,
     dur:Math.max(parseInt(document.getElementById('fDur').value,10)||2,1),
     venue:document.getElementById('fVenue').value.trim()||(allVenues()[0]||''),
@@ -1840,6 +1927,7 @@ function saveEvent(){
   if(state.editId){
     var e=byId(state.editId);
     Object.keys(data).forEach(function(k){ e[k]=data[k]; });
+    if(e.endDate===undefined) delete e.endDate; // rapihin: jangan nyimpen key undefined di storage
     if(e.pairs){
       var np=normalizePairs(e);
       var n=0; if(np){ np.list.forEach(function(pr){ n+=pr.length; }); n+=(np.unpaired||[]).length; }
@@ -1847,6 +1935,7 @@ function saveEvent(){
     }
     toast('Jadwal diperbarui');
   } else {
+    if(data.endDate===undefined) delete data.endDate;
     data.id=uid(); data.pairs=null; state.events.push(data);
     toast('Jadwal ditambahkan');
   }
