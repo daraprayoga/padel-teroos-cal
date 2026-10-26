@@ -221,6 +221,125 @@ a.act{text-decoration:none}
 .cell .mk i.turnamen{background:var(--teal)}
 .cell.on .mk i{background:var(--matcha-soft)}
 
+/* ===== MONTH VIEW (v0.6.0) ===== */
+.calseg{margin-bottom:14px}
+.mhero{padding:18px 20px 18px;margin-top:2px}
+.mhero > *{position:relative;z-index:1}
+.mh-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mh-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--matcha-soft)}
+.mh-nav{display:flex;align-items:center;gap:7px}
+.mh-nav button{width:34px;height:34px;border-radius:var(--r-pill);display:grid;place-items:center;
+  background:rgba(241,240,226,.1);border:1px solid rgba(241,240,226,.14);color:#f1f0e2;transition:box-shadow .14s}
+.mh-nav button:active{box-shadow:inset 0 2px 6px rgba(0,0,0,.35)}
+.mh-nav svg{width:15px;height:15px}
+.mh-nav .mh-today{width:auto;padding:0 13px;font-size:12px;font-weight:700}
+.mh-title{margin:12px 0 0;display:flex;align-items:baseline;gap:10px;font-size:40px;font-weight:700;letter-spacing:-.035em;line-height:1}
+.mh-title i{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:40px;letter-spacing:-.01em;color:var(--matcha-soft)}
+.mh-load{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px}
+.mh-load b{display:block;font-size:19px;font-weight:700;letter-spacing:-.02em}
+.mh-load span{display:block;font-size:12.5px;opacity:.7;margin-top:3px}
+.mh-meter{display:flex;gap:4px;flex:none}
+.mh-meter i{width:20px;height:8px;border-radius:4px;background:rgba(241,240,226,.16)}
+.mh-meter i.on{background:var(--matcha-soft)}
+.mh-stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:16px;padding-top:15px;border-top:1px solid rgba(241,240,226,.12)}
+.mh-stats div{padding-left:14px;border-left:1px solid rgba(241,240,226,.12)}
+.mh-stats div:first-child{padding-left:0;border-left:none}
+.mh-stats b{display:block;font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.mh-stats span{display:block;font-size:11.5px;opacity:.68;margin-top:6px}
+.mh-mix{margin-top:16px}
+.mh-bar{display:flex;gap:3px;height:8px}
+.mh-bar i{display:block;height:100%;border-radius:4px;min-width:8px}
+.mh-leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:11px;font-size:12px}
+.mh-leg span{display:inline-flex;align-items:center;gap:6px;opacity:.88}
+.mh-leg i{width:8px;height:8px;border-radius:50%}
+.mh-leg b{font-family:'JetBrains Mono',monospace;font-weight:700}
+.mh-bar i.t,.mh-leg i.t{background:#e3ecc8}
+.mh-bar i.s,.mh-leg i.s{background:#a8bd7a}
+.mh-bar i.m,.mh-leg i.m{background:#6c8437}
+
+.mcal{padding:14px 12px 12px;margin-top:12px}
+.mgrid{gap:3px;--lanes:1}
+.mgrid .dow{padding-bottom:8px}
+.mgrid .cell{position:relative;aspect-ratio:auto;border:1.5px solid transparent;
+  min-height:calc(33px + var(--lanes) * 8px);padding:6px 0 5px;justify-content:flex-start;align-items:stretch;gap:5px}
+.mgrid .cell .dn{display:block;text-align:center;line-height:18px;height:18px}
+.mgrid .cell.heat1{background:rgba(168,189,122,.15)}
+.mgrid .cell.heat2{background:rgba(168,189,122,.30)}
+.mgrid .cell.heat3{background:rgba(168,189,122,.46)}
+.mgrid .cell.now{border-color:var(--matcha);color:var(--matcha)}
+.mgrid .cell.on{background:#2b3417;border-color:#2b3417;color:#fff}
+.mgrid .cell .tr{position:absolute;right:5px;top:4px;width:9px;height:9px;color:var(--matcha-deep)}
+.mgrid .cell.on .tr{color:#e3ecc8}
+.mgrid .cell .more{position:absolute;right:5px;top:6px;font-size:8.5px;font-weight:700;line-height:1;color:var(--ink-mute)}
+.mgrid .cell.on .more{color:var(--matcha-soft)}
+.bars{display:flex;flex-direction:column;gap:3px}
+.bar{display:block;height:5px;margin:0 -3px}
+.bar.st{margin-left:4px;border-top-left-radius:3px;border-bottom-left-radius:3px}
+.bar.en{margin-right:4px;border-top-right-radius:3px;border-bottom-right-radius:3px}
+.bar.t{background:#2f3a18}
+.bar.s{background:#6c8437}
+.bar.m{background:#a8bd7a}
+.bar.none{background:transparent}
+.cell.on .bar.t{background:#e3ecc8}
+.cell.on .bar.s{background:#a8bd7a}
+.cell.on .bar.m{background:#7d8f4a}
+.mleg{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:12px 4px 2px;font-size:11.5px;color:var(--ink-soft)}
+.mleg span{display:inline-flex;align-items:center;gap:6px}
+.mleg i{width:14px;height:5px;border-radius:3px}
+.mleg i.t{background:#2f3a18}
+.mleg i.s{background:#6c8437}
+.mleg i.m{background:#a8bd7a}
+.mleg svg{width:11px;height:11px;color:var(--matcha-deep)}
+
+.slim{display:flex;align-items:center;gap:9px;padding:14px 16px;border-radius:var(--r-md);
+  background:rgba(255,255,255,.55);border:1px dashed rgba(47,58,24,.16);color:var(--ink-mute);font-size:13px}
+.slim svg{width:16px;height:16px;color:var(--matcha-soft);flex:none}
+.slim button{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--matcha)}
+
+#monthExtra .sec{margin-top:28px}
+.mtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mtile{min-width:0;padding:12px;background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.9);border-radius:var(--r-md);box-shadow:var(--sh)}
+.mtile small{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute)}
+.mtile small svg{width:12px;height:12px;color:var(--matcha);flex:none}
+.mtile b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  margin-top:8px;font-size:15.5px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.mtile span{display:block;margin-top:4px;font-size:11.5px;line-height:1.35;color:var(--ink-mute)}
+
+.mrow{width:100%;text-align:left;display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;
+  padding:11px 14px 11px 11px;margin-bottom:9px;background:var(--card);
+  backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+  border:1px solid rgba(255,255,255,.9);border-radius:var(--r-lg);box-shadow:var(--sh);transition:box-shadow .14s}
+.mrow:active{box-shadow:inset 0 2px 7px rgba(47,58,24,.14)}
+.mrow.past{opacity:.66}
+.mb{height:58px;border-radius:var(--r-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  background:#2b3417;color:#fff}
+.mb b{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.mb b.rng{font-size:14.5px}
+.mb i{font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.8;line-height:1}
+.mrow.s .mb{background:#6c8437}
+.mrow.m .mb{background:var(--matcha-wash);color:#2b3417}
+.mi{min-width:0}
+.mt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-size:15px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
+.mm{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:12px;color:var(--ink-mute);min-width:0}
+.mm svg{width:13px;height:13px;color:var(--matcha);flex:none}
+.mm span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms{align-self:start;padding-top:2px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:var(--matcha);white-space:nowrap}
+.mrow.past .ms{color:var(--ink-mute)}
+
+.myear{padding:16px 14px 14px;background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.9);border-radius:var(--r-xl);box-shadow:var(--sh)}
+.myr{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;height:86px;align-items:end}
+.myr button{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px}
+.myr button i{display:block;width:100%;max-width:22px;min-height:4px;border-radius:7px 7px 4px 4px;background:var(--matcha-soft);
+  transition:background-color .16s ease}
+.myr button.zero i{background:rgba(47,58,24,.1)}
+.myr button.on i{background:#2b3417}
+.myr button em{flex:none;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--ink-mute)}
+.myr button.on em{color:var(--ink);font-weight:700}
+.mcap{margin:13px 2px 0;font-size:11.5px;line-height:1.45;color:var(--ink-mute)}
+
 /* ===== LINEUP ===== */
 .court{background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border:1px solid rgba(255,255,255,.9);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:var(--sh)}
@@ -439,23 +558,25 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
     <div class="topbar">
       <button class="rbtn" onclick="go('home')" aria-label="Kembali"><svg><use href="#i-back"/></svg></button>
       <div class="who" style="text-align:center"><b id="stripLabel">April 2026</b><span>Kalender club</span></div>
-      <button class="rbtn" id="viewBtn" onclick="toggleCalView()" aria-label="Tampilan bulan"><svg><use href="#i-grid"/></svg></button>
+      <button class="rbtn" id="viewBtn" onclick="toggleCalView()" aria-label="Tampilan bulan" style="display:none"><svg><use href="#i-grid"/></svg></button>
       <button class="rbtn dark adminOnly" onclick="openAdd()" aria-label="Tambah jadwal"><svg><use href="#i-plus"/></svg></button>
     </div>
-    <h1 class="head" style="font-size:34px;margin-bottom:16px">Tanggal berapa<br>ada apa</h1>
+    <h1 class="head" id="calHead" style="font-size:34px;margin-bottom:16px">Tanggal berapa<br>ada apa</h1>
+    <div class="seg2 calseg" id="calModeSeg">
+      <button class="on" data-m="strip" onclick="setCalMode('strip')">Hari</button>
+      <button data-m="month" onclick="setCalMode('month')">Bulan</button>
+    </div>
     <div class="days" id="dayStrip"></div>
-    <div class="cal" id="monthCal" style="display:none">
-      <div class="calh">
-        <b id="calMonth">April 2026</b>
-        <div>
-          <button onclick="shiftMonth(-1)" aria-label="Bulan sebelumnya"><svg><use href="#i-back"/></svg></button>
-          <button onclick="shiftMonth(1)" aria-label="Bulan berikutnya"><svg><use href="#i-fwd"/></svg></button>
-        </div>
+    <div id="monthCal" style="display:none">
+      <div class="stat mhero" id="mHero"></div>
+      <div class="cal mcal">
+        <div class="grid mgrid" id="calGrid"></div>
+        <div class="mleg" id="calLegend"></div>
       </div>
-      <div class="grid" id="calGrid"></div>
     </div>
     <div class="pills" id="calFilters" style="margin-top:16px"></div>
     <div id="agenda" style="margin-top:6px"></div>
+    <div id="monthExtra" style="display:none"></div>
   </section>
 
   <!-- LINEUP -->
@@ -675,7 +796,7 @@ var state = {
   calFilter:'all',
   calRef:new Date(initDate+'T00:00:00'),
   selDate:initDate,
-  calMode:'strip',
+  calMode:(store.get('teroos_calmode','strip')==='month'?'month':'strip'),
   lineupId:null,
   editId:null,
   formType:'mabar',
@@ -1136,11 +1257,39 @@ function card(e){
 function blank(t,m,btn){ return '<div class="empty">'+ic('i-cal')+'<b>'+t+'</b><p>'+m+'</p>'+(btn||'')+'</div>'; }
 
 /* ============ JADWAL ============ */
-function toggleCalView(){
-  state.calMode = state.calMode==='strip' ? 'month' : 'strip';
+function setCalMode(mode){
+  state.calMode = (mode==='month') ? 'month' : 'strip';
+  store.set('teroos_calmode', state.calMode);
   renderJadwal();
 }
-function shiftMonth(n){ state.calRef=new Date(state.calRef.getFullYear(), state.calRef.getMonth()+n, 1); renderJadwal(); }
+function toggleCalView(){ setCalMode(state.calMode==='strip' ? 'month' : 'strip'); }
+function defaultDateFor(y,m){
+  var t=new Date();
+  if(t.getFullYear()===y && t.getMonth()===m) return iso(t);
+  var pre=monthPrefix(y,m), best=null;
+  state.events.forEach(function(e){
+    eventDates(e).forEach(function(k){ if(k.indexOf(pre)===0 && (best===null || k<best)) best=k; });
+  });
+  return best || (pre+'01');
+}
+function jumpMonth(y,m){
+  state.calRef=new Date(y,m,1);
+  state.selDate=defaultDateFor(y,m);
+  renderJadwal();
+  try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(err){}
+}
+function shiftMonth(n){
+  var d=new Date(state.calRef.getFullYear(), state.calRef.getMonth()+n, 1);
+  state.calRef=d;
+  if(state.calMode==='month') state.selDate=defaultDateFor(d.getFullYear(), d.getMonth());
+  renderJadwal();
+}
+function goToday(){
+  var t=new Date();
+  state.calRef=new Date(t.getFullYear(), t.getMonth(), 1);
+  state.selDate=iso(t);
+  renderJadwal();
+}
 
 function pickDate(k){
   var d=new Date(k+'T00:00:00');
@@ -1148,7 +1297,6 @@ function pickDate(k){
   state.selDate=k;
   state.calRef=d;
   document.getElementById('stripLabel').textContent = MON[d.getMonth()]+' '+d.getFullYear();
-  document.getElementById('calMonth').textContent = MON[d.getMonth()]+' '+d.getFullYear();
   if(state.calMode==='strip'){
     updateStripSelection(k);
   } else if(monthChanged){
@@ -1169,6 +1317,9 @@ function renderJadwal(){
   document.getElementById('dayStrip').style.display = strip?'':'none';
   document.getElementById('monthCal').style.display = strip?'none':'';
   document.getElementById('viewBtn').innerHTML = ic(strip?'i-grid':'i-cal');
+  document.getElementById('calHead').style.display = strip?'':'none';
+  document.getElementById('monthExtra').style.display = strip?'none':'';
+  document.querySelectorAll('#calModeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.m===state.calMode); });
   var ref=new Date(state.selDate+'T00:00:00');
   document.getElementById('stripLabel').textContent = MON[ref.getMonth()]+' '+ref.getFullYear();
   strip ? renderStrip() : renderMonth();
@@ -1221,21 +1372,234 @@ function renderStrip(){
   var on=el.querySelector('.dchip.on');
   if(on) el.scrollLeft = Math.max(on.offsetLeft - 100, 0);
 }
-function renderMonth(){
-  var y=state.calRef.getFullYear(), m=state.calRef.getMonth();
-  document.getElementById('calMonth').textContent = MON[m]+' '+y;
-  var first=new Date(y,m,1), start=new Date(y,m,1-first.getDay()), today=addDays(0), html='';
-  DAY.forEach(function(d){ html += '<div class="dow">'+d.slice(0,2)+'</div>'; });
-  for(var i=0;i<42;i++){
-    var d=new Date(start.getFullYear(), start.getMonth(), start.getDate()+i), k=iso(d);
-    var cls='cell'+(d.getMonth()!==m?' mute':'')+(k===today?' now':'')+(k===state.selDate?' on':'');
-    html += '<button class="'+cls+'" data-date="'+k+'" onclick="pickDate(\''+k+'\')">'+d.getDate()+'<span class="mk">'+marks(k)+'</span></button>';
-    if(i>=34 && d.getMonth()!==m && d.getDay()===6) break;
-  }
-  var grid=document.getElementById('calGrid');
-  grid.innerHTML = html;
-  reAnimate(grid);
+/* ============ MONTH VIEW (v0.6.0) ============ */
+function typeKey(e){ var t=e&&e.type; if(t==='battle') t='sparing'; return (t==='turnamen'||t==='sparing')?t:'mabar'; }
+var TK_CLS = {turnamen:'t', sparing:'s', mabar:'m'};
+function cleanTitle(e){ return String((e&&e.title)||'(tanpa judul)').split(' @ ')[0]; }
+function shortVenue(v){ return String(v||'').split(',')[0].trim(); }
+function monthPrefix(y,m){ return y+'-'+pad2(m+1)+'-'; }
+function fmtDM(k){ var x=new Date(k+'T00:00:00'); return x.getDate()+' '+MON[x.getMonth()].slice(0,3); }
+
+function monthStats(y,m){
+  var pre=monthPrefix(y,m), dim=new Date(y,m+1,0).getDate();
+  var st={y:y,m:m,dim:dim,sessions:0,types:{mabar:0,sparing:0,turnamen:0},days:{},occupied:0,score:0,
+    people:{},peopleN:0,weekday:[0,0,0,0,0,0,0],venues:{},events:[],tourneys:[]};
+  state.events.forEach(function(e){
+    if(!e || !e.date) return;
+    var ds=eventDates(e).filter(function(k){ return k.indexOf(pre)===0; });
+    if(!ds.length) return;
+    var tk=typeKey(e);
+    st.sessions++; st.types[tk]++; st.events.push(e);
+    if(tk==='turnamen') st.tourneys.push(e);
+    ds.forEach(function(k){
+      var d=st.days[k] || (st.days[k]={n:0,tourney:false});
+      d.n++; if(tk==='turnamen') d.tourney=true;
+    });
+    peopleList(e).forEach(function(p){ if(p && p!=='TBC') st.people[p]=1; });
+    var v=shortVenue(e.venue); if(v) st.venues[v]=(st.venues[v]||0)+1;
+  });
+  Object.keys(st.days).forEach(function(k){
+    var d=st.days[k];
+    st.occupied++;
+    st.score += d.tourney ? 2 : 1;     // hari turnamen dihitung 2x: seharian main, bukan sesi biasa
+    st.weekday[new Date(k+'T00:00:00').getDay()]++;
+  });
+  st.peopleN=Object.keys(st.people).length;
+  st.events.sort(function(a,b){ return (a.date+(a.time||'00:00'))<(b.date+(b.time||'00:00'))?-1:1; });
+  st.ratio = dim ? st.score/dim : 0;
+  return st;
 }
+function busyInfo(st){
+  var r=st.ratio;
+  if(!st.sessions) return {lv:0,label:'Kosong'};
+  if(r<0.10) return {lv:1,label:'Santai'};
+  if(r<0.22) return {lv:2,label:'Lumayan sibuk'};
+  if(r<0.40) return {lv:3,label:'Sibuk'};
+  return {lv:4,label:'Padat banget'};
+}
+function relLabel(e){
+  if(isPast(e)) return 'Selesai';
+  var today=addDays(0), ds=eventDates(e), i=ds.indexOf(today);
+  if(i>-1) return hasRange(e) ? 'Hari ke-'+(i+1) : 'Hari ini';
+  var diff=Math.round((new Date(e.date+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);
+  return diff===1 ? 'Besok' : diff+' hari lagi';
+}
+function assignLanes(list){
+  list.sort(function(a,b){
+    if(a.e.date!==b.e.date) return a.e.date<b.e.date?-1:1;
+    if(a.end!==b.end) return a.end>b.end?-1:1;       // yang lebih panjang duluan
+    return 0;
+  });
+  var lanes=[];
+  list.forEach(function(p){
+    var placed=false;
+    for(var i=0;i<lanes.length;i++){
+      if(lanes[i] < p.e.date){ lanes[i]=p.end; p.lane=i; placed=true; break; }
+    }
+    if(!placed){ lanes.push(p.end); p.lane=lanes.length-1; }
+  });
+  return lanes.length;
+}
+
+function renderMonth(){
+  try{
+    var y=state.calRef.getFullYear(), m=state.calRef.getMonth();
+    var st=monthStats(y,m), bi=busyInfo(st);
+    var now=new Date(), isCur=(now.getFullYear()===y && now.getMonth()===m);
+
+    /* ---- hero ---- */
+    var meter=''; for(var q=1;q<=4;q++) meter += '<i'+(q<=bi.lv?' class="on"':'')+'></i>';
+    var mix='';
+    if(st.sessions){
+      var order=[['turnamen','t','Turnamen'],['sparing','s','Sparing'],['mabar','m','Latihan']];
+      mix = '<div class="mh-mix"><div class="mh-bar">'+
+        order.filter(function(o){ return st.types[o[0]]>0; }).map(function(o){
+          return '<i class="'+o[1]+'" style="flex:'+st.types[o[0]]+'"></i>';
+        }).join('')+'</div><div class="mh-leg">'+
+        order.filter(function(o){ return st.types[o[0]]>0; }).map(function(o){
+          return '<span><i class="'+o[1]+'"></i>'+o[2]+' <b>'+st.types[o[0]]+'</b></span>';
+        }).join('')+'</div></div>';
+    }
+    document.getElementById('mHero').innerHTML =
+      '<div class="mh-top"><span class="mh-eye">Overview bulan</span><div class="mh-nav">'+
+        '<button onclick="shiftMonth(-1)" aria-label="Bulan sebelumnya">'+ic('i-back')+'</button>'+
+        (isCur ? '' : '<button class="mh-today" onclick="goToday()">Hari ini</button>')+
+        '<button onclick="shiftMonth(1)" aria-label="Bulan berikutnya">'+ic('i-fwd')+'</button>'+
+      '</div></div>'+
+      '<h2 class="mh-title" id="calMonth">'+MON[m]+'<i>'+y+'</i></h2>'+
+      '<div class="mh-load"><div><b>'+bi.label+'</b><span>'+
+        (st.sessions ? st.occupied+' dari '+st.dim+' hari ada acara' : 'Belum ada sesi dijadwalkan')+
+      '</span></div><div class="mh-meter" aria-hidden="true">'+meter+'</div></div>'+
+      '<div class="mh-stats">'+
+        '<div><b>'+st.sessions+'</b><span>Sesi</span></div>'+
+        '<div><b>'+st.occupied+'</b><span>Hari terisi</span></div>'+
+        '<div><b>'+st.peopleN+'</b><span>Pemain</span></div>'+
+      '</div>'+mix;
+
+    /* ---- grid ---- */
+    var first=new Date(y,m,1), rows=Math.ceil((first.getDay()+st.dim)/7);
+    var gstart=new Date(y,m,1-first.getDay()), today=addDays(0), cells=[];
+    for(var i=0;i<rows*7;i++) cells.push(new Date(gstart.getFullYear(), gstart.getMonth(), gstart.getDate()+i));
+    var gs=iso(cells[0]), ge=iso(cells[cells.length-1]);
+
+    var vis=[];
+    state.events.forEach(function(e){
+      if(!e || !e.date) return;
+      var ds=eventDates(e);
+      if(ds[0]<=ge && ds[ds.length-1]>=gs) vis.push({e:e, ds:ds, end:ds[ds.length-1], lane:0});
+    });
+    var laneCount=assignLanes(vis);
+    var lanesShown=Math.min(3, Math.max(1, laneCount));
+
+    var html='';
+    DAY.forEach(function(d){ html += '<div class="dow">'+d+'</div>'; });
+    cells.forEach(function(d,ci){
+      var k=iso(d), col=ci%7;
+      var items=vis.filter(function(p){ return p.ds.indexOf(k)>-1; });
+      var n=items.length;
+      var hasT=items.some(function(p){ return typeKey(p.e)==='turnamen'; });
+      var more=items.filter(function(p){ return p.lane>=3; }).length;
+      var bars='';
+      for(var li=0; li<lanesShown; li++){
+        var it=null;
+        for(var j=0;j<items.length;j++){ if(items[j].lane===li){ it=items[j]; break; } }
+        if(!it){ bars += '<i class="bar none"></i>'; continue; }
+        var isFirst=(k===it.e.date), isLast=(k===it.end);
+        bars += '<i class="bar '+TK_CLS[typeKey(it.e)]+((isFirst||col===0)?' st':'')+((isLast||col===6)?' en':'')+'"></i>';
+      }
+      var names=items.map(function(p){ return cleanTitle(p.e); }).join(' · ');
+      var cls='cell'+(d.getMonth()!==m?' mute':'')+(k===today?' now':'')+(k===state.selDate?' on':'')+(n?' heat'+Math.min(n,3):'');
+      html += '<button class="'+cls+'" data-date="'+k+'" onclick="pickDate(\''+k+'\')"'+
+        ' aria-label="'+escapeAttr(DAYL[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+(n?', '+n+' sesi: '+names:', kosong'))+'"'+
+        (names ? ' title="'+escapeAttr(names)+'"' : '')+'>'+
+        (hasT ? ic('i-trophy').replace('<svg','<svg class="tr"') : '')+
+        (more ? '<span class="more">+'+more+'</span>' : '')+
+        '<span class="dn">'+d.getDate()+'</span><span class="bars">'+bars+'</span></button>';
+    });
+    var grid=document.getElementById('calGrid');
+    grid.style.setProperty('--lanes', lanesShown);
+    grid.innerHTML = html;
+    reAnimate(grid);
+
+    document.getElementById('calLegend').innerHTML =
+      '<span><i class="t"></i>Turnamen</span><span><i class="s"></i>Sparing</span><span><i class="m"></i>Latihan</span>'+
+      '<span>'+ic('i-trophy')+'Hari turnamen</span>';
+
+    renderMonthExtra(st);
+  }catch(err){
+    console.error('renderMonth gagal', err);
+    var g=document.getElementById('calGrid');
+    if(g) g.innerHTML='<div class="slim" style="grid-column:1/-1">'+ic('i-info')+'<span>Kalender bulan gagal dimuat, coba reload.</span></div>';
+  }
+}
+
+function renderMonthExtra(st){
+  var el=document.getElementById('monthExtra'); if(!el) return;
+  var y=st.y, m=st.m, html='';
+
+  /* ---- tiles ---- */
+  var nextT=null;
+  st.tourneys.forEach(function(e){ if(!nextT && !isPast(e)) nextT=e; });
+  var t1v = st.tourneys.length ? st.tourneys.length+' turnamen' : 'Belum ada';
+  var t1s = st.tourneys.length ? (nextT ? 'Berikutnya '+fmtDM(nextT.date) : 'Semua sudah lewat') : 'Bulan tanpa turnamen';
+
+  var wmax=0; st.weekday.forEach(function(c){ if(c>wmax) wmax=c; });
+  var wtop=[]; st.weekday.forEach(function(c,i){ if(wmax>0 && c===wmax) wtop.push(i); });
+  var t2v='-', t2s='Belum ada hari terisi';
+  if(wtop.length===1){ t2v=DAYL[wtop[0]]; t2s=wmax+' hari terisi'; }
+  else if(wtop.length===2){ t2v=DAYL[wtop[0]]+' & '+DAYL[wtop[1]]; t2s=wmax+' hari terisi masing-masing'; }
+  else if(wtop.length>2){ t2v='Merata'; t2s='Tersebar di '+wtop.length+' hari berbeda'; }
+
+  var vtop=null, vn=0, vkeys=Object.keys(st.venues);
+  vkeys.forEach(function(v){ if(st.venues[v]>vn){ vn=st.venues[v]; vtop=v; } });
+  var t3v = vtop || '-', t3s = vtop ? vn+' sesi'+(vkeys.length>1 ? ' · '+vkeys.length+' lokasi' : '') : 'Belum ada lokasi';
+
+  html += '<div class="mtiles">'+
+    '<div class="mtile"><small>'+ic('i-trophy')+'Turnamen</small><b>'+t1v+'</b><span>'+t1s+'</span></div>'+
+    '<div class="mtile"><small>'+ic('i-cal')+'Hari favorit</small><b>'+t2v+'</b><span>'+t2s+'</span></div>'+
+    '<div class="mtile"><small>'+ic('i-pin')+'Lokasi</small><b>'+escapeAttr(t3v)+'</b><span>'+t3s+'</span></div>'+
+  '</div>';
+
+  /* ---- daftar sesi ---- */
+  html += '<div class="sec"><h2>Sesi di bulan '+MON[m]+'</h2><span class="muted">'+st.sessions+' sesi</span></div>';
+  if(!st.events.length){
+    html += blank('Bulan ini masih kosong','Belum ada sesi di '+MON[m]+' '+y+'.',
+      state.admin ? '<button class="act" onclick="openAdd(null,\''+monthPrefix(y,m)+'01\')">'+ic('i-plus')+'Jadwalin sesi</button>' : '');
+  } else {
+    html += st.events.map(function(e){
+      try{
+        var tk=typeKey(e), range=hasRange(e);
+        var d1=new Date(e.date+'T00:00:00'), d2=range ? new Date(e.endDate+'T00:00:00') : null;
+        var block = range
+          ? '<b class="rng">'+d1.getDate()+'-'+d2.getDate()+'</b><i>'+DAY[d1.getDay()]+'-'+DAY[d2.getDay()]+'</i>'
+          : '<b>'+d1.getDate()+'</b><i>'+DAY[d1.getDay()]+'</i>';
+        var when = range ? (e.time ? 'Mulai '+e.time : 'Jam menyusul')
+                         : (e.time ? e.time+(e.dur?'-'+endT(e.time,e.dur):'') : 'Jam menyusul');
+        return '<button class="mrow '+TK_CLS[tk]+(isPast(e)?' past':'')+'" onclick="openDetail(\''+e.id+'\')">'+
+          '<span class="mb">'+block+'</span>'+
+          '<span class="mi"><span class="mt">'+escapeAttr(cleanTitle(e))+'</span>'+
+            '<span class="mm">'+ic(TYPE_ICON[tk])+'<span>'+TYPE[tk]+' · '+when+'</span></span>'+
+            '<span class="mm">'+ic('i-pin')+'<span>'+escapeAttr(e.venue||'-')+'</span></span></span>'+
+          '<span class="ms">'+relLabel(e)+'</span></button>';
+      }catch(err){ console.error('mrow gagal', e&&e.id, err); return ''; }
+    }).join('');
+  }
+
+  /* ---- strip setahun ---- */
+  var mi=['J','F','M','A','M','J','J','A','S','O','N','D'], cols='';
+  for(var mm=0; mm<12; mm++){
+    var s2=monthStats(y,mm), h=s2.sessions ? Math.max(9, Math.round(Math.min(s2.ratio/0.5,1)*54)) : 4;
+    cols += '<button class="'+(mm===m?'on':'')+(s2.sessions?'':' zero')+'" onclick="jumpMonth('+y+','+mm+')" '+
+      'aria-label="'+MON[mm]+' '+y+': '+s2.sessions+' sesi" title="'+MON[mm]+': '+s2.sessions+' sesi">'+
+      '<i style="height:'+h+'px"></i><em>'+mi[mm]+'</em></button>';
+  }
+  html += '<div class="sec"><h2>Sepanjang '+y+'</h2><span class="muted">tap bulan buat pindah</span></div>'+
+    '<div class="myear"><div class="myr">'+cols+'</div>'+
+    '<p class="mcap">Tinggi bar = seberapa padat bulannya. Dihitung dari jumlah hari terisi, dan hari turnamen dihitung 2x karena main seharian.</p></div>';
+
+  el.innerHTML = html;
+}
+
 function slotOf(t){ if(!t) return 'pagi'; var h=parseInt(t.split(':')[0],10); return h<11?'pagi':(h<17?'sore':'malam'); }
 function renderAgenda(){
   try{
@@ -1246,7 +1610,10 @@ function renderAgenda(){
   var head='<div class="sec"><h2>'+fmtL(state.selDate)+'</h2><span class="muted">'+
     (state.selDate===addDays(0)?'Hari ini':evs.length+' sesi')+'</span></div>';
   var html;
-  if(!evs.length){
+  if(!evs.length && state.calMode==='month'){
+    html = head + '<div class="slim">'+ic('i-cal')+'<span>Belum ada sesi di tanggal ini</span>'+
+      (state.admin ? '<button onclick="openAdd(null,\''+state.selDate+'\')">+ Jadwalin</button>' : '')+'</div>';
+  } else if(!evs.length){
     html = head + blank('Court kosong',
       state.admin ? 'Belum ada sesi di tanggal ini. Tap plus buat jadwalin.' : 'Belum ada sesi di tanggal ini. Cek tanggal lain di strip atas.',
       state.admin ? '<button class="act" onclick="openAdd(null,\''+state.selDate+'\')">'+ic('i-plus')+'Jadwalin sesi</button>' : '');
