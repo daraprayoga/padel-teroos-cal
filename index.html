@@ -301,6 +301,7 @@ a.act{text-decoration:none}
   background:rgba(255,255,255,.55);border:1px dashed rgba(47,58,24,.16);color:var(--ink-mute);font-size:13px}
 .slim svg{width:16px;height:16px;color:var(--matcha-soft);flex:none}
 .slim button{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--matcha)}
+#agenda .slim{margin-bottom:20px}
 
 #monthExtra .sec{margin-top:28px}
 .mtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -505,6 +506,12 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 .row span{font-size:12.5px;color:var(--ink-mute)}
 
 /* ===== MOTION (v0.7.0) ===== */
+body.boot .screen>*{animation:none!important;opacity:0}
+/* cross-fade: layar lama tetap tampil sambil memudar, jadi tidak ada jeda kosong */
+@keyframes leave{to{opacity:0}}
+.screen.leaving{display:block;position:absolute;top:0;left:var(--pad);right:var(--pad);pointer-events:none;
+  animation:leave .22s ease-out forwards}
+.screen.leaving>*{animation:none!important}
 :root{--ease:cubic-bezier(.22,1,.36,1);--ease-io:cubic-bezier(.65,0,.35,1)}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes riseSoft{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -592,7 +599,7 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 .toast{transition:opacity .3s var(--ease),transform .45s var(--ease)}
 </style>
 </head>
-<body>
+<body class="boot">
 
 <div class="bg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="blob b4"></i></div>
 
@@ -1314,8 +1321,14 @@ function submitPin(){
 function go(s){
   state.screen=s;
   state.motion.key=null;
+  var nextEl=document.getElementById('s-'+s), prevEl=document.querySelector('.screen.active');
+  [].forEach.call(document.querySelectorAll('.screen.leaving'), function(el){ el.classList.remove('leaving'); });
   document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
-  document.getElementById('s-'+s).classList.add('active');
+  if(prevEl && prevEl!==nextEl && !REDUCE && s!=='add' && prevEl.id!=='s-add'){
+    prevEl.classList.add('leaving');
+    setTimeout(function(){ prevEl.classList.remove('leaving'); }, 240);
+  }
+  nextEl.classList.add('active');
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.s===s); });
   document.getElementById('tabbar').classList.toggle('hide', s==='add');
   window.scrollTo(0,0);
@@ -1332,10 +1345,15 @@ function go(s){
     }
   }
   // Quiet refresh from cloud when navigating (so member always sees latest)
+  paint();
   if(getSyncId() && s!=='add'){
-    cloudPull().then(function(status){ paint(); }).catch(function(){ paint(); });
-  } else {
-    paint();
+    var before=JSON.stringify([state.events,state.roster]);
+    cloudPull().then(function(){
+      if(state.screen!==s) return;
+      if(JSON.stringify([state.events,state.roster])===before) return;   // data sama: jangan render ulang (biar gak kedip)
+      state.quiet=true;
+      try{ paint(); }finally{ state.quiet=false; }
+    }).catch(function(){});
   }
 }
 
@@ -2576,6 +2594,7 @@ applyAccess();
 ensureRoster();
 function startApp(fromCloud){
   ensureRoster();
+  setTimeout(function(){ document.body.classList.remove('boot'); }, 4000);
   try{
     if(getSyncConfig() && (location.search.indexOf('s=')>=0 || location.search.indexOf('sync=')>=0)){
       history.replaceState(null,'', syncShareUrl());
@@ -2583,6 +2602,7 @@ function startApp(fromCloud){
   }catch(e){}
   renderHome();
   renderJadwal();
+  document.body.classList.remove('boot');
   try{
     var mo=new MutationObserver(schedulePills), mOpt={attributes:true,attributeFilter:['class']};
     mo.observe(document.getElementById('tabbar'),{attributes:true,attributeFilter:['class'],subtree:true});
