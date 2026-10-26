@@ -283,13 +283,19 @@ a.act{text-decoration:none}
 .cell.on .bar.t{background:#e3ecc8}
 .cell.on .bar.s{background:#a8bd7a}
 .cell.on .bar.m{background:#7d8f4a}
-.mleg{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:12px 4px 2px;font-size:11.5px;color:var(--ink-soft)}
-.mleg span{display:inline-flex;align-items:center;gap:6px}
-.mleg i{width:14px;height:5px;border-radius:3px}
-.mleg i.t{background:#2f3a18}
-.mleg i.s{background:#6c8437}
-.mleg i.m{background:#a8bd7a}
-.mleg svg{width:11px;height:11px;color:var(--matcha-deep)}
+.mleg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 0}
+.mleg button{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;border:1.5px solid rgba(82,102,39,.2);background:transparent;font:inherit;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent}
+.mleg button svg{width:14px;height:14px}
+.mleg button i{width:8px;height:8px;border-radius:50%;flex:none}
+.mleg button i.t{background:#2f3a18}
+.mleg button i.s{background:#6c8437}
+.mleg button i.m{background:#a8bd7a}
+.mleg button b{font-weight:700;opacity:.65;font-variant-numeric:tabular-nums;margin-left:auto}
+.mleg button.on{background:var(--matcha-deep);border-color:var(--matcha-deep);color:#f4f1e3}
+.mleg button.on i{box-shadow:0 0 0 1.5px rgba(244,241,227,.55)}
+.mleg button.zero{opacity:.45}
+.mleg button:active{box-shadow:inset 0 2px 5px rgba(0,0,0,.2)}
+.mfil{margin:10px 4px 0;font-size:11.5px;color:var(--ink-soft)}
 
 .slim{display:flex;align-items:center;gap:9px;padding:14px 16px;border-radius:var(--r-md);
   background:rgba(255,255,255,.55);border:1px dashed rgba(47,58,24,.16);color:var(--ink-mute);font-size:13px}
@@ -1309,6 +1315,7 @@ function pickDate(k){
 function setCalFilter(k){
   state.calFilter=k;
   document.querySelectorAll('#calFilters .pill').forEach(function(el){ el.classList.toggle('on', el.dataset.key===k); });
+  if(state.calMode==='month') renderMonth();
   renderAgenda();
 }
 
@@ -1319,6 +1326,7 @@ function renderJadwal(){
   document.getElementById('viewBtn').innerHTML = ic(strip?'i-grid':'i-cal');
   document.getElementById('calHead').style.display = strip?'':'none';
   document.getElementById('monthExtra').style.display = strip?'none':'';
+  document.getElementById('calFilters').style.display = strip?'':'none';
   document.querySelectorAll('#calModeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.m===state.calMode); });
   var ref=new Date(state.selDate+'T00:00:00');
   document.getElementById('stripLabel').textContent = MON[ref.getMonth()]+' '+ref.getFullYear();
@@ -1380,7 +1388,7 @@ function shortVenue(v){ return String(v||'').split(',')[0].trim(); }
 function monthPrefix(y,m){ return y+'-'+pad2(m+1)+'-'; }
 function fmtDM(k){ var x=new Date(k+'T00:00:00'); return x.getDate()+' '+MON[x.getMonth()].slice(0,3); }
 
-function monthStats(y,m){
+function monthStats(y,m,f){
   var pre=monthPrefix(y,m), dim=new Date(y,m+1,0).getDate();
   var st={y:y,m:m,dim:dim,sessions:0,types:{mabar:0,sparing:0,turnamen:0},days:{},occupied:0,score:0,
     people:{},peopleN:0,weekday:[0,0,0,0,0,0,0],venues:{},events:[],tourneys:[]};
@@ -1389,6 +1397,7 @@ function monthStats(y,m){
     var ds=eventDates(e).filter(function(k){ return k.indexOf(pre)===0; });
     if(!ds.length) return;
     var tk=typeKey(e);
+    if(f && f!=='all' && tk!==f) return;
     st.sessions++; st.types[tk]++; st.events.push(e);
     if(tk==='turnamen') st.tourneys.push(e);
     ds.forEach(function(k){
@@ -1444,7 +1453,8 @@ function assignLanes(list){
 function renderMonth(){
   try{
     var y=state.calRef.getFullYear(), m=state.calRef.getMonth();
-    var st=monthStats(y,m), bi=busyInfo(st);
+    var f=state.calFilter||'all';
+    var st=monthStats(y,m), bi=busyInfo(st), stF=monthStats(y,m,f);
     var now=new Date(), isCur=(now.getFullYear()===y && now.getMonth()===m);
 
     /* ---- hero ---- */
@@ -1486,6 +1496,7 @@ function renderMonth(){
     state.events.forEach(function(e){
       if(!e || !e.date) return;
       var ds=eventDates(e);
+      if(f!=='all' && typeKey(e)!==f) return;
       if(ds[0]<=ge && ds[ds.length-1]>=gs) vis.push({e:e, ds:ds, end:ds[ds.length-1], lane:0});
     });
     var laneCount=assignLanes(vis);
@@ -1522,10 +1533,13 @@ function renderMonth(){
     reAnimate(grid);
 
     document.getElementById('calLegend').innerHTML =
-      '<span><i class="t"></i>Turnamen</span><span><i class="s"></i>Sparing</span><span><i class="m"></i>Latihan</span>'+
-      '<span>'+ic('i-trophy')+'Hari turnamen</span>';
+      [['all','i-cal','','Semua',st.sessions],['turnamen','i-trophy','t','Turnamen',st.types.turnamen],
+       ['sparing',TYPE_ICON.sparing,'s','Sparing',st.types.sparing],['mabar',TYPE_ICON.mabar,'m','Latihan',st.types.mabar]].map(function(o){
+        return '<button class="'+(f===o[0]?'on':'')+(o[0]!=='all'&&!o[4]?' zero':'')+'" onclick="setCalFilter(\''+o[0]+'\')" aria-pressed="'+(f===o[0])+'">'+
+          (o[2]?'<i class="'+o[2]+'"></i>':'')+ic(o[1])+o[3]+' <b>'+o[4]+'</b></button>';
+      }).join('');
 
-    renderMonthExtra(st);
+    renderMonthExtra(stF);
   }catch(err){
     console.error('renderMonth gagal', err);
     var g=document.getElementById('calGrid');
@@ -1535,13 +1549,15 @@ function renderMonth(){
 
 function renderMonthExtra(st){
   var el=document.getElementById('monthExtra'); if(!el) return;
-  var y=st.y, m=st.m, html='';
+  var y=st.y, m=st.m, html='', f=state.calFilter||'all';
+  var fl=f==='all'?'Sesi':TYPE[f];
 
   /* ---- tiles ---- */
   var nextT=null;
-  st.tourneys.forEach(function(e){ if(!nextT && !isPast(e)) nextT=e; });
-  var t1v = st.tourneys.length ? st.tourneys.length+' turnamen' : 'Belum ada';
-  var t1s = st.tourneys.length ? (nextT ? 'Berikutnya '+fmtDM(nextT.date) : 'Semua sudah lewat') : 'Bulan tanpa turnamen';
+  var tAll=monthStats(y,m).tourneys;
+  tAll.forEach(function(e){ if(!nextT && !isPast(e)) nextT=e; });
+  var t1v = tAll.length ? tAll.length+' turnamen' : 'Belum ada';
+  var t1s = tAll.length ? (nextT ? 'Berikutnya '+fmtDM(nextT.date) : 'Semua sudah lewat') : 'Bulan tanpa turnamen';
 
   var wmax=0; st.weekday.forEach(function(c){ if(c>wmax) wmax=c; });
   var wtop=[]; st.weekday.forEach(function(c,i){ if(wmax>0 && c===wmax) wtop.push(i); });
@@ -1561,10 +1577,10 @@ function renderMonthExtra(st){
   '</div>';
 
   /* ---- daftar sesi ---- */
-  html += '<div class="sec"><h2>Sesi di bulan '+MON[m]+'</h2><span class="muted">'+st.sessions+' sesi</span></div>';
+  html += '<div class="sec"><h2>'+fl+' di bulan '+MON[m]+'</h2><span class="muted">'+st.sessions+' sesi</span></div>';
   if(!st.events.length){
-    html += blank('Bulan ini masih kosong','Belum ada sesi di '+MON[m]+' '+y+'.',
-      state.admin ? '<button class="act" onclick="openAdd(null,\''+monthPrefix(y,m)+'01\')">'+ic('i-plus')+'Jadwalin sesi</button>' : '');
+    html += blank(f==='all'?'Bulan ini masih kosong':'Gak ada '+fl+' bulan ini', f==='all'?'Belum ada sesi di '+MON[m]+' '+y+'.':'Pilih Semua di atas buat lihat sesi lain.',
+      state.admin && f==='all' ? '<button class="act" onclick="openAdd(null,\''+monthPrefix(y,m)+'01\')">'+ic('i-plus')+'Jadwalin sesi</button>' : '');
   } else {
     html += st.events.map(function(e){
       try{
@@ -1588,7 +1604,7 @@ function renderMonthExtra(st){
   /* ---- strip setahun ---- */
   var mi=['J','F','M','A','M','J','J','A','S','O','N','D'], cols='';
   for(var mm=0; mm<12; mm++){
-    var s2=monthStats(y,mm), h=s2.sessions ? Math.max(9, Math.round(Math.min(s2.ratio/0.5,1)*54)) : 4;
+    var s2=monthStats(y,mm,f), h=s2.sessions ? Math.max(9, Math.round(Math.min(s2.ratio/0.5,1)*54)) : 4;
     cols += '<button class="'+(mm===m?'on':'')+(s2.sessions?'':' zero')+'" onclick="jumpMonth('+y+','+mm+')" '+
       'aria-label="'+MON[mm]+' '+y+': '+s2.sessions+' sesi" title="'+MON[mm]+': '+s2.sessions+' sesi">'+
       '<i style="height:'+h+'px"></i><em>'+mi[mm]+'</em></button>';
