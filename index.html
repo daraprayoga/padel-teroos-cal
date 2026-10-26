@@ -802,7 +802,7 @@ var state = {
   calFilter:'all',
   calRef:new Date(initDate+'T00:00:00'),
   selDate:initDate,
-  calMode:(store.get('teroos_calmode','strip')==='month'?'month':'strip'),
+  calMode:(store.get('teroos_calmode','month')==='strip'?'strip':'month'),
   lineupId:null,
   editId:null,
   formType:'mabar',
@@ -1487,8 +1487,8 @@ function renderMonth(){
       '</div>'+mix;
 
     /* ---- grid ---- */
-    var first=new Date(y,m,1), rows=Math.ceil((first.getDay()+st.dim)/7);
-    var gstart=new Date(y,m,1-first.getDay()), today=addDays(0), cells=[];
+    var first=new Date(y,m,1), off=(first.getDay()+6)%7, rows=Math.ceil((off+st.dim)/7);
+    var gstart=new Date(y,m,1-off), today=addDays(0), cells=[];
     for(var i=0;i<rows*7;i++) cells.push(new Date(gstart.getFullYear(), gstart.getMonth(), gstart.getDate()+i));
     var gs=iso(cells[0]), ge=iso(cells[cells.length-1]);
 
@@ -1503,7 +1503,7 @@ function renderMonth(){
     var lanesShown=Math.min(3, Math.max(1, laneCount));
 
     var html='';
-    DAY.forEach(function(d){ html += '<div class="dow">'+d+'</div>'; });
+    [1,2,3,4,5,6,0].forEach(function(i){ html += '<div class="dow">'+DAY[i]+'</div>'; });
     cells.forEach(function(d,ci){
       var k=iso(d), col=ci%7;
       var items=vis.filter(function(p){ return p.ds.indexOf(k)>-1; });
