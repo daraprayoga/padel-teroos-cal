@@ -506,9 +506,9 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 
 /* ===== MOTION (v0.7.0) ===== */
 :root{--ease:cubic-bezier(.22,1,.36,1);--ease-io:cubic-bezier(.65,0,.35,1)}
-@keyframes rise{from{opacity:0;transform:translateY(14px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes riseSoft{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes cellIn{from{opacity:0;transform:translateY(7px);filter:blur(3px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes cellIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @keyframes wipeX{from{clip-path:inset(0 100% 0 0 round 4px)}to{clip-path:inset(0 0 0 0 round 4px)}}
 @keyframes wipeY{from{clip-path:inset(100% 0 0 0 round 4px)}to{clip-path:inset(0 0 0 0 round 4px)}}
 @keyframes fillX{from{transform:translateX(-101%)}to{transform:none}}
@@ -554,13 +554,10 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
   transition:transform .55s var(--ease),width .55s var(--ease),height .55s var(--ease),opacity .3s}
 .mgrid.quiet .bar{animation:none!important}
 .mgrid .bar:not(.none){animation:wipeX .6s var(--ease) backwards;animation-delay:calc(var(--base,.05s) + var(--i,0)*18ms)}
-.mcal.go{animation:rise .7s var(--ease) .12s backwards}
 .mcal.go{--base:.4s}
-.mcal.go .mgrid .dow{animation:riseSoft .5s var(--ease) .15s backwards}
-.mcal.go .mgrid .cell{animation:cellIn .6s var(--ease) backwards;animation-delay:calc(.2s + var(--i,0)*24ms)}
+.mcal.go .mgrid .cell[class*=heat]{animation:cellIn .6s var(--ease) backwards;animation-delay:calc(.2s + var(--i,0)*24ms)}
 
 /* hero bulan */
-.mhero.go{animation:rise .7s var(--ease) backwards}
 .mhero.go .mh-top{animation:riseSoft .6s var(--ease) .1s backwards}
 .mhero.go .mh-title{animation:rise .8s var(--ease) .14s backwards}
 .mhero.go .mh-load{animation:rise .8s var(--ease) .22s backwards}
@@ -1217,9 +1214,8 @@ function toast(msg){
 }
 function reAnimate(el){
   if(!el) return;
-  el.classList.remove('fade-swap');
-  if(state.quiet) return;
-  void el.offsetWidth; el.classList.add('fade-swap');
+  if(state.quiet){ el.classList.remove('fade-swap'); return; }
+  el.classList.add('fade-swap');
 }
 var REDUCE = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 function countUp(el, to, dur, delay){
@@ -1653,9 +1649,12 @@ function renderMonth(){
       '</div>'+mix;
     var mhEl=document.getElementById('mHero'), mcEl=document.querySelector('#monthCal .mcal');
     mhEl.classList.toggle('still', !fresh);
-    [mhEl, mcEl].forEach(function(el){
-      el.classList.remove('go');
-      if(enter){ void el.offsetWidth; el.classList.add('go'); }
+    [mhEl, mcEl].forEach(function(el,i){
+      el.classList.toggle('go', enter);
+      if(enter && !REDUCE && el.animate){
+        el.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],
+          {duration:700,delay:i*120,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'});
+      }
     });
     if(fresh){
       countUpAll(mhEl.querySelector('.mh-stats'), 'b', 380);
@@ -1708,12 +1707,12 @@ function renderMonth(){
     grid.classList.toggle('quiet', state.quiet);
     grid.innerHTML = html;
     var sp=document.createElement('i'); sp.className='selpill'; grid.insertBefore(sp, grid.firstChild);
-    placeSel(false);
+    requestAnimationFrame(function(){ placeSel(false); });
     if(dir!==0 && !REDUCE && grid.animate){
       var tx=dir*26, ttl=mhEl.querySelector('.mh-title');
       [ttl, grid].forEach(function(el,i){
         if(!el) return;
-        el.animate([{opacity:0,transform:'translateX('+tx+'px)',filter:'blur(3px)'},{opacity:1,transform:'none',filter:'blur(0px)'}],
+        el.animate([{opacity:0,transform:'translateX('+tx+'px)'},{opacity:1,transform:'none'}],
           {duration:560,easing:'cubic-bezier(.22,1,.36,1)',delay:i*45});
       });
     }
@@ -2585,7 +2584,10 @@ function startApp(fromCloud){
   renderHome();
   renderJadwal();
   try{
-    new MutationObserver(schedulePills).observe(document.body,{attributes:true,attributeFilter:['class'],subtree:true});
+    var mo=new MutationObserver(schedulePills), mOpt={attributes:true,attributeFilter:['class']};
+    mo.observe(document.getElementById('tabbar'),{attributes:true,attributeFilter:['class'],subtree:true});
+    [].forEach.call(document.querySelectorAll('.seg2'),function(el){ mo.observe(el,{attributes:true,attributeFilter:['class'],subtree:true}); });
+    [].forEach.call(document.querySelectorAll('.screen'),function(el){ mo.observe(el,mOpt); });
     window.addEventListener('resize', schedulePills);
     if(document.fonts && document.fonts.ready) document.fonts.ready.then(schedulePills);
     schedulePills();
