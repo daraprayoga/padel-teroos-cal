@@ -503,6 +503,96 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 .row svg{width:18px;height:18px;color:var(--matcha);flex:none}
 .row b{flex:1;font-size:14px;font-weight:600}
 .row span{font-size:12.5px;color:var(--ink-mute)}
+
+/* ===== MOTION (v0.7.0) ===== */
+:root{--ease:cubic-bezier(.22,1,.36,1);--ease-io:cubic-bezier(.65,0,.35,1)}
+@keyframes rise{from{opacity:0;transform:translateY(14px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes riseSoft{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes cellIn{from{opacity:0;transform:translateY(7px);filter:blur(3px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes wipeX{from{clip-path:inset(0 100% 0 0 round 4px)}to{clip-path:inset(0 0 0 0 round 4px)}}
+@keyframes wipeY{from{clip-path:inset(100% 0 0 0 round 4px)}to{clip-path:inset(0 0 0 0 round 4px)}}
+@keyframes fillX{from{transform:translateX(-101%)}to{transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* screen masuk: tiap blok naik bergantian */
+.screen.active{animation:none}
+.screen.active>*{animation:rise .62s var(--ease) backwards;animation-delay:calc(var(--i,0)*60ms)}
+.screen.active>*:nth-child(1){--i:0}.screen.active>*:nth-child(2){--i:1}.screen.active>*:nth-child(3){--i:2}
+.screen.active>*:nth-child(4){--i:3}.screen.active>*:nth-child(5){--i:4}.screen.active>*:nth-child(6){--i:5}
+.screen.active>*:nth-child(7){--i:6}.screen.active>*:nth-child(8){--i:7}.screen.active>*:nth-child(n+9){--i:8}
+.screen.active>#monthCal,.screen.active>#monthExtra{animation:none}
+
+/* render ulang list: anak naik bergantian */
+.fade-swap{animation:none}
+.fade-swap>*{animation:riseSoft .5s var(--ease) backwards;animation-delay:calc(var(--i,0)*45ms)}
+.fade-swap>*:nth-child(1){--i:0}.fade-swap>*:nth-child(2){--i:1}.fade-swap>*:nth-child(3){--i:2}
+.fade-swap>*:nth-child(4){--i:3}.fade-swap>*:nth-child(5){--i:4}.fade-swap>*:nth-child(6){--i:5}
+.fade-swap>*:nth-child(7){--i:6}.fade-swap>*:nth-child(8){--i:7}.fade-swap>*:nth-child(9){--i:8}.fade-swap>*:nth-child(n+10){--i:9}
+
+/* pill geser: segmented + tabbar */
+.seg2,.tabbar{--px:0px;--pw:0px}
+.seg2{position:relative}
+.seg2::before,.tabbar::before{content:'';position:absolute;left:0;top:4px;height:calc(100% - 8px);width:var(--pw);
+  transform:translateX(var(--px));border-radius:var(--r-pill);background:#2b3417;opacity:0;pointer-events:none;
+  transition:transform .55s var(--ease),width .55s var(--ease),opacity .25s}
+.tabbar::before{top:8px;height:calc(100% - 16px)}
+.seg2.ready::before,.tabbar.ready::before{opacity:1}
+.seg2.nt::before,.tabbar.nt::before{transition:none}
+.seg2 button,.tab{position:relative;z-index:1;transition:background-color .16s ease,color .35s var(--ease)}
+.seg2.ready button.on,.tabbar.ready .tab.on{background:transparent}
+
+/* chip filter: warna pindah halus */
+.pill{transition:background-color .35s var(--ease),color .35s var(--ease),box-shadow .2s ease,border-color .35s var(--ease)}
+.mleg button{transition:background-color .35s var(--ease),border-color .35s var(--ease),color .35s var(--ease),opacity .3s,box-shadow .2s ease}
+
+/* kalender bulan */
+.mgrid{position:relative}
+.mgrid .cell{transition:color .3s var(--ease) .06s}
+.mgrid .cell.on{background:transparent;border-color:transparent}
+.selpill{position:absolute;left:0;top:0;width:0;height:0;border-radius:var(--r-sm);background:#2b3417;
+  box-shadow:0 5px 12px rgba(43,52,23,.24);pointer-events:none;opacity:0;
+  transition:transform .55s var(--ease),width .55s var(--ease),height .55s var(--ease),opacity .3s}
+.mgrid.quiet .bar{animation:none!important}
+.mgrid .bar:not(.none){animation:wipeX .6s var(--ease) backwards;animation-delay:calc(var(--base,.05s) + var(--i,0)*18ms)}
+.mcal.go{animation:rise .7s var(--ease) .12s backwards}
+.mcal.go{--base:.4s}
+.mcal.go .mgrid .dow{animation:riseSoft .5s var(--ease) .15s backwards}
+.mcal.go .mgrid .cell{animation:cellIn .6s var(--ease) backwards;animation-delay:calc(.2s + var(--i,0)*24ms)}
+
+/* hero bulan */
+.mhero.go{animation:rise .7s var(--ease) backwards}
+.mhero.go .mh-top{animation:riseSoft .6s var(--ease) .1s backwards}
+.mhero.go .mh-title{animation:rise .8s var(--ease) .14s backwards}
+.mhero.go .mh-load{animation:rise .8s var(--ease) .22s backwards}
+.mhero.go .mh-stats{animation:rise .8s var(--ease) .3s backwards}
+.mh-meter i{position:relative;overflow:hidden}
+.mh-meter i.on{background:rgba(241,240,226,.16)}
+.mh-meter i.on::after{content:'';position:absolute;inset:0;background:var(--matcha-soft)}
+.mhero:not(.still) .mh-meter i.on::after{animation:fillX .7s var(--ease) backwards}
+.mhero:not(.still) .mh-meter i:nth-child(1)::after{animation-delay:.45s}
+.mhero:not(.still) .mh-meter i:nth-child(2)::after{animation-delay:.55s}
+.mhero:not(.still) .mh-meter i:nth-child(3)::after{animation-delay:.65s}
+.mhero:not(.still) .mh-meter i:nth-child(4)::after{animation-delay:.75s}
+.mhero:not(.still) .mh-bar i{animation:wipeX .9s var(--ease) backwards}
+.mhero:not(.still) .mh-bar i:nth-child(1){animation-delay:.5s}
+.mhero:not(.still) .mh-bar i:nth-child(2){animation-delay:.62s}
+.mhero:not(.still) .mh-bar i:nth-child(3){animation-delay:.74s}
+.mhero:not(.still) .mh-leg span{animation:riseSoft .5s var(--ease) backwards}
+.mhero:not(.still) .mh-leg span:nth-child(1){animation-delay:.6s}
+.mhero:not(.still) .mh-leg span:nth-child(2){animation-delay:.68s}
+.mhero:not(.still) .mh-leg span:nth-child(3){animation-delay:.76s}
+
+/* bagian bawah bulan */
+#monthExtra.enter>*{animation:rise .75s var(--ease) backwards;animation-delay:calc(.3s + var(--i,0)*65ms)}
+#monthExtra.flt>*{animation:riseSoft .42s var(--ease) backwards;animation-delay:calc(var(--i,0)*32ms)}
+#monthExtra.quiet *{animation:none!important}
+.myr button i{animation:wipeY .8s var(--ease) backwards;animation-delay:calc(var(--yb,.05s) + var(--mi,0)*45ms)}
+#monthExtra.enter{--yb:.7s}
+
+/* sheet & toast lebih halus */
+.scrim{transition:opacity .35s var(--ease)}
+.sheet{transition:transform .42s var(--ease)}
+.toast{transition:opacity .3s var(--ease),transform .45s var(--ease)}
 </style>
 </head>
 <body>
@@ -800,6 +890,8 @@ var state = {
   filter:'all',
   viewMode:'upcoming',
   calFilter:'all',
+  motion:{key:null,ym:null},
+  quiet:false,
   calRef:new Date(initDate+'T00:00:00'),
   selDate:initDate,
   calMode:(store.get('teroos_calmode','month')==='strip'?'strip':'month'),
@@ -1123,7 +1215,66 @@ function toast(msg){
   var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('on');
   clearTimeout(el._t); el._t=setTimeout(function(){ el.classList.remove('on'); },2000);
 }
-function reAnimate(el){ if(!el) return; el.classList.remove('fade-swap'); void el.offsetWidth; el.classList.add('fade-swap'); }
+function reAnimate(el){
+  if(!el) return;
+  el.classList.remove('fade-swap');
+  if(state.quiet) return;
+  void el.offsetWidth; el.classList.add('fade-swap');
+}
+var REDUCE = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function countUp(el, to, dur, delay){
+  to = +to; if(!el) return;
+  if(REDUCE || state.quiet || !(to>0)){ el.textContent = to; return; }
+  var token = el._cu = {}, t0 = performance.now() + (delay||0);
+  el.textContent = '0';
+  (function step(now){
+    if(el._cu!==token || !document.body.contains(el)) return;
+    var p = (now - t0) / dur;
+    if(p<0){ requestAnimationFrame(step); return; }
+    if(p>1) p=1;
+    el.textContent = Math.round(to * (1 - Math.pow(1-p, 4)));
+    if(p<1) requestAnimationFrame(step);
+  })(performance.now());
+}
+function countUpAll(root, sel, delay){
+  if(!root) return;
+  [].forEach.call(root.querySelectorAll(sel), function(b,i){
+    var t=(b.textContent||'').trim();
+    if(/^\d+$/.test(t)) countUp(b, t, 900, (delay||0)+i*90);
+  });
+}
+/* pill geser untuk segmented control dan tabbar */
+function syncPills(){
+  [['.seg2','button.on'],['.tabbar','.tab.on']].forEach(function(cfg){
+    [].forEach.call(document.querySelectorAll(cfg[0]), function(box){
+      var on=box.querySelector(cfg[1]);
+      if(!on || !box.offsetWidth || !on.offsetWidth) return;
+      var first=!box.classList.contains('ready');
+      if(first) box.classList.add('nt');
+      box.style.setProperty('--px', on.offsetLeft+'px');
+      box.style.setProperty('--pw', on.offsetWidth+'px');
+      if(first){
+        void box.offsetWidth; box.classList.add('ready');
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.classList.remove('nt'); }); });
+      }
+    });
+  });
+}
+var _pillRaf=0;
+function schedulePills(){ if(_pillRaf) return; _pillRaf=requestAnimationFrame(function(){ _pillRaf=0; syncPills(); placeSel(true); }); }
+function placeSel(anim){
+  var grid=document.getElementById('calGrid'); if(!grid) return;
+  var pill=grid.querySelector('.selpill'); if(!pill) return;
+  var on=grid.querySelector('.cell.on');
+  if(!on){ pill.style.opacity='0'; return; }
+  if(!on.offsetWidth) return;
+  function set(){
+    pill.style.width=on.offsetWidth+'px'; pill.style.height=on.offsetHeight+'px';
+    pill.style.transform='translate('+on.offsetLeft+'px,'+on.offsetTop+'px)'; pill.style.opacity='1';
+  }
+  if(anim){ set(); }
+  else { pill.style.transition='none'; set(); void pill.offsetWidth; pill.style.transition=''; }
+}
 
 /* ============ ADMIN ============ */
 function applyAccess(){
@@ -1166,6 +1317,7 @@ function submitPin(){
 /* ============ NAV ============ */
 function go(s){
   state.screen=s;
+  state.motion.key=null;
   document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
   document.getElementById('s-'+s).classList.add('active');
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.s===s); });
@@ -1177,6 +1329,7 @@ function go(s){
       if(s==='jadwal') renderJadwal();
       if(s==='lineup') renderLineup();
       if(s==='club') renderClub();
+      if(s!=='jadwal') countUpAll(document.getElementById('s-'+s), '.kpi b', 250);
     }catch(err){
       console.error('render screen gagal:', s, err);
       toast('Ada yang gagal ke-render, coba reload halaman');
@@ -1266,6 +1419,7 @@ function blank(t,m,btn){ return '<div class="empty">'+ic('i-cal')+'<b>'+t+'</b><
 function setCalMode(mode){
   state.calMode = (mode==='month') ? 'month' : 'strip';
   store.set('teroos_calmode', state.calMode);
+  state.motion.key=null;
   renderJadwal();
 }
 function toggleCalView(){ setCalMode(state.calMode==='strip' ? 'month' : 'strip'); }
@@ -1331,11 +1485,16 @@ function renderJadwal(){
   var ref=new Date(state.selDate+'T00:00:00');
   document.getElementById('stripLabel').textContent = MON[ref.getMonth()]+' '+ref.getFullYear();
   strip ? renderStrip() : renderMonth();
-  document.getElementById('calFilters').innerHTML = ['all','mabar','sparing','turnamen'].map(function(k){
-    var icon = k==='all' ? 'i-cal' : TYPE_ICON[k];
-    return '<button class="pill'+(state.calFilter===k?' on':'')+'" data-key="'+k+'" onclick="setCalFilter(\''+k+'\')">'+
-      ic(icon)+(k==='all'?'Semua':TYPE[k])+'</button>';
-  }).join('');
+  var cf=document.getElementById('calFilters');
+  if(cf.children.length!==4){
+    cf.innerHTML = ['all','mabar','sparing','turnamen'].map(function(k){
+      var icon = k==='all' ? 'i-cal' : TYPE_ICON[k];
+      return '<button class="pill'+(state.calFilter===k?' on':'')+'" data-key="'+k+'" onclick="setCalFilter(\''+k+'\')">'+
+        ic(icon)+(k==='all'?'Semua':TYPE[k])+'</button>';
+    }).join('');
+  } else {
+    [].forEach.call(cf.children, function(b){ b.classList.toggle('on', b.dataset.key===state.calFilter); });
+  }
   renderAgenda();
 }
 function marks(key){
@@ -1359,6 +1518,7 @@ function syncCalSelection(){
   var grid=document.getElementById('calGrid');
   if(grid){
     grid.querySelectorAll('.cell').forEach(function(c){ c.classList.toggle('on', c.dataset.date===k); });
+    placeSel(true);
   }
 }
 function updateStripSelection(k){ syncCalSelection(); }
@@ -1455,6 +1615,12 @@ function renderMonth(){
     var y=state.calRef.getFullYear(), m=state.calRef.getMonth();
     var f=state.calFilter||'all';
     var st=monthStats(y,m), bi=busyInfo(st), stF=monthStats(y,m,f);
+    var key=y+'-'+m, ym=y*12+m, prevYm=state.motion.ym;
+    var fresh = !state.quiet && state.motion.key!==key;
+    var dir = (fresh && state.motion.key!==null && prevYm!==null) ? (ym>prevYm?1:-1) : 0;
+    var enter = fresh && dir===0;
+    state.motion.key=key; state.motion.ym=ym;
+    var mode = state.quiet ? 'quiet' : (enter ? 'enter' : 'flt');
     var now=new Date(), isCur=(now.getFullYear()===y && now.getMonth()===m);
 
     /* ---- hero ---- */
@@ -1485,6 +1651,16 @@ function renderMonth(){
         '<div><b>'+st.occupied+'</b><span>Hari terisi</span></div>'+
         '<div><b>'+st.peopleN+'</b><span>Pemain</span></div>'+
       '</div>'+mix;
+    var mhEl=document.getElementById('mHero'), mcEl=document.querySelector('#monthCal .mcal');
+    mhEl.classList.toggle('still', !fresh);
+    [mhEl, mcEl].forEach(function(el){
+      el.classList.remove('go');
+      if(enter){ void el.offsetWidth; el.classList.add('go'); }
+    });
+    if(fresh){
+      countUpAll(mhEl.querySelector('.mh-stats'), 'b', 380);
+      countUpAll(mhEl.querySelector('.mh-leg'), 'b', 700);
+    }
 
     /* ---- grid ---- */
     var first=new Date(y,m,1), off=(first.getDay()+6)%7, rows=Math.ceil((off+st.dim)/7);
@@ -1520,7 +1696,7 @@ function renderMonth(){
       }
       var names=items.map(function(p){ return cleanTitle(p.e); }).join(' · ');
       var cls='cell'+(d.getMonth()!==m?' mute':'')+(k===today?' now':'')+(k===state.selDate?' on':'')+(n?' heat'+Math.min(n,3):'');
-      html += '<button class="'+cls+'" data-date="'+k+'" onclick="pickDate(\''+k+'\')"'+
+      html += '<button class="'+cls+'" data-date="'+k+'" style="--i:'+(Math.floor(ci/7)+col)+'" onclick="pickDate(\''+k+'\')"'+
         ' aria-label="'+escapeAttr(DAYL[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+(n?', '+n+' sesi: '+names:', kosong'))+'"'+
         (names ? ' title="'+escapeAttr(names)+'"' : '')+'>'+
         (hasT ? ic('i-trophy').replace('<svg','<svg class="tr"') : '')+
@@ -1529,17 +1705,37 @@ function renderMonth(){
     });
     var grid=document.getElementById('calGrid');
     grid.style.setProperty('--lanes', lanesShown);
+    grid.classList.toggle('quiet', state.quiet);
     grid.innerHTML = html;
-    reAnimate(grid);
+    var sp=document.createElement('i'); sp.className='selpill'; grid.insertBefore(sp, grid.firstChild);
+    placeSel(false);
+    if(dir!==0 && !REDUCE && grid.animate){
+      var tx=dir*26, ttl=mhEl.querySelector('.mh-title');
+      [ttl, grid].forEach(function(el,i){
+        if(!el) return;
+        el.animate([{opacity:0,transform:'translateX('+tx+'px)',filter:'blur(3px)'},{opacity:1,transform:'none',filter:'blur(0px)'}],
+          {duration:560,easing:'cubic-bezier(.22,1,.36,1)',delay:i*45});
+      });
+    }
 
-    document.getElementById('calLegend').innerHTML =
-      [['all','i-cal','','Semua',st.sessions],['turnamen','i-trophy','t','Turnamen',st.types.turnamen],
-       ['sparing',TYPE_ICON.sparing,'s','Sparing',st.types.sparing],['mabar',TYPE_ICON.mabar,'m','Latihan',st.types.mabar]].map(function(o){
-        return '<button class="'+(f===o[0]?'on':'')+(o[0]!=='all'&&!o[4]?' zero':'')+'" onclick="setCalFilter(\''+o[0]+'\')" aria-pressed="'+(f===o[0])+'">'+
-          (o[2]?'<i class="'+o[2]+'"></i>':'')+ic(o[1])+o[3]+' <b>'+o[4]+'</b></button>';
+    var lg=document.getElementById('calLegend');
+    var lgDef=[['all','i-cal','','Semua',st.sessions],['turnamen','i-trophy','t','Turnamen',st.types.turnamen],
+       ['sparing',TYPE_ICON.sparing,'s','Sparing',st.types.sparing],['mabar',TYPE_ICON.mabar,'m','Latihan',st.types.mabar]];
+    if(lg.children.length!==4){
+      lg.innerHTML = lgDef.map(function(o){
+        return '<button data-k="'+o[0]+'" onclick="setCalFilter(\''+o[0]+'\')">'+
+          (o[2]?'<i class="'+o[2]+'"></i>':'')+ic(o[1])+o[3]+' <b></b></button>';
       }).join('');
+    }
+    lgDef.forEach(function(o,i){
+      var b=lg.children[i];
+      b.classList.toggle('on', f===o[0]);
+      b.classList.toggle('zero', o[0]!=='all' && !o[4]);
+      b.setAttribute('aria-pressed', f===o[0]);
+      b.querySelector('b').textContent=o[4];
+    });
 
-    renderMonthExtra(stF);
+    renderMonthExtra(stF, mode);
   }catch(err){
     console.error('renderMonth gagal', err);
     var g=document.getElementById('calGrid');
@@ -1547,7 +1743,7 @@ function renderMonth(){
   }
 }
 
-function renderMonthExtra(st){
+function renderMonthExtra(st, mode){
   var el=document.getElementById('monthExtra'); if(!el) return;
   var y=st.y, m=st.m, html='', f=state.calFilter||'all';
   var fl=f==='all'?'Sesi':TYPE[f];
@@ -1605,7 +1801,7 @@ function renderMonthExtra(st){
   var mi=['J','F','M','A','M','J','J','A','S','O','N','D'], cols='';
   for(var mm=0; mm<12; mm++){
     var s2=monthStats(y,mm,f), h=s2.sessions ? Math.max(9, Math.round(Math.min(s2.ratio/0.5,1)*54)) : 4;
-    cols += '<button class="'+(mm===m?'on':'')+(s2.sessions?'':' zero')+'" onclick="jumpMonth('+y+','+mm+')" '+
+    cols += '<button class="'+(mm===m?'on':'')+(s2.sessions?'':' zero')+'" style="--mi:'+mm+'" onclick="jumpMonth('+y+','+mm+')" '+
       'aria-label="'+MON[mm]+' '+y+': '+s2.sessions+' sesi" title="'+MON[mm]+': '+s2.sessions+' sesi">'+
       '<i style="height:'+h+'px"></i><em>'+mi[mm]+'</em></button>';
   }
@@ -1614,6 +1810,8 @@ function renderMonthExtra(st){
     '<p class="mcap">Tinggi bar = seberapa padat bulannya. Dihitung dari jumlah hari terisi, dan hari turnamen dihitung 2x karena main seharian.</p></div>';
 
   el.innerHTML = html;
+  el.classList.remove('enter','flt','quiet'); el.classList.add(mode||'flt');
+  [].forEach.call(el.children, function(c,i){ c.style.setProperty('--i', Math.min(i,9)); });
 }
 
 function slotOf(t){ if(!t) return 'pagi'; var h=parseInt(t.split(':')[0],10); return h<11?'pagi':(h<17?'sore':'malam'); }
@@ -2386,12 +2584,19 @@ function startApp(fromCloud){
   }catch(e){}
   renderHome();
   renderJadwal();
+  try{
+    new MutationObserver(schedulePills).observe(document.body,{attributes:true,attributeFilter:['class'],subtree:true});
+    window.addEventListener('resize', schedulePills);
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(schedulePills);
+    schedulePills();
+  }catch(err){}
   // Auto-refresh dari cloud tiap 20 detik (member selalu dapat update admin)
   if(getSyncConfig()){
     setInterval(function(){
       if(state.screen==='add' || state.pairEdit || state.groupsEdit) return;
       cloudPull().then(function(status){
         if(status!=='ok') return; // 'error' atau 'empty' → jangan sentuh state lokal yang lagi ditampilin
+        state.quiet=true;
         try{
           ensureRoster();
           if(state.screen==='home') renderHome();
@@ -2401,6 +2606,7 @@ function startApp(fromCloud){
         }catch(err){
           console.error('auto-refresh render gagal', err);
         }
+        state.quiet=false;
       });
     }, 20000);
   }
