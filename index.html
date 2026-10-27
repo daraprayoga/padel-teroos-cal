@@ -511,15 +511,29 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 .badge.healing{background:#f1f5e4;color:#4a5b26}
 .badge.healing i{background:transparent;border:1.5px solid #6c8437;box-sizing:border-box}
 .act.healing{background:#a8bd7a;color:#2b3417;box-shadow:0 6px 14px rgba(125,143,74,.22)}
-.seg.four{grid-template-columns:repeat(4,1fr);gap:6px}
-.seg.four button{padding:15px 2px;font-size:12.5px}
+.seg.five{grid-template-columns:repeat(6,1fr);gap:8px}
+.seg.five button:nth-child(-n+3){grid-column:span 2}
+.seg.five button:nth-child(n+4){grid-column:span 3}
+.seg.five button{padding:14px 4px}
 .seg button[data-t=healing].on{background:#f3f7e6;border-color:#a8bd7a;color:#3f5019}
 .bar.h{background:rgba(168,189,122,.3);border:1.5px solid #8fa65a;box-sizing:border-box}
 .cell.on .bar.h{background:rgba(227,236,200,.25);border-color:#cfe0a3}
 .mh-bar i.h,.mh-leg i.h{background:rgba(168,189,122,.2);border:1.5px solid #a8bd7a;box-sizing:border-box}
 .mleg button i.h{background:transparent;border:1.5px solid #6c8437;box-sizing:border-box}
-.mleg button[data-k=all]{grid-column:1/-1}
 .mrow.h .mb{background:#fff;color:#2b3417;border:1.5px solid #a8bd7a;box-sizing:border-box}
+
+
+/* ===== LATIHAN (v0.8.1): garis diagonal dua hijau ===== */
+.dchip .mk i.latihan,.cell .mk i.latihan{background:linear-gradient(135deg,#6c8437 50%,#a8bd7a 50%)}
+.badge.latihan{background:#eaf0d8;color:#3f5019}
+.badge.latihan i{background:linear-gradient(135deg,#6c8437 50%,#a8bd7a 50%)}
+.act.latihan{background:#6c8437;box-shadow:0 6px 14px rgba(108,132,55,.26)}
+.seg button[data-t=latihan].on{background:#eef2dc;border-color:#6c8437;color:#3f5019}
+.bar.l{background:repeating-linear-gradient(135deg,#6c8437 0 3px,#a8bd7a 3px 6px)}
+.cell.on .bar.l{background:repeating-linear-gradient(135deg,#e3ecc8 0 3px,#a8bd7a 3px 6px)}
+.mh-bar i.l,.mh-leg i.l{background:repeating-linear-gradient(135deg,#e3ecc8 0 3px,#6c8437 3px 6px)}
+.mleg button i.l{background:linear-gradient(135deg,#6c8437 50%,#a8bd7a 50%)}
+.mrow.l .mb{background:repeating-linear-gradient(135deg,#6c8437 0 7px,#789040 7px 14px)}
 
 /* ===== MOTION (v0.7.0) ===== */
 body.boot .screen>*{animation:none!important;opacity:0}
@@ -633,6 +647,7 @@ body.boot .screen>*{animation:none!important;opacity:0}
 <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 20a6 6 0 0 1 12 0M16.4 5.4a3.3 3.3 0 0 1 0 5.9M17.8 14.6a5.7 5.7 0 0 1 3.2 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.6 20a7.4 7.4 0 0 1 14.8 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16.5 4.5H21v4.5M21 4.5l-7 7M16.5 19.5H21V15M21 19.5l-7-7M3 4.5l5 5M3 19.5l6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-train" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 13.5V9.8M9.5 3.2h5M12 3.2v3.3M18.2 7.3l1.3-1.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-heal" viewBox="0 0 24 24"><path d="M5 10h11v4.2a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16 11.2h1.3a2.3 2.3 0 0 1 0 4.6H15.6M8.6 3.6c-.9 1 .9 1.8 0 2.8M12.4 3.6c-.9 1 .9 1.8 0 2.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.6 6.2c2.6 2.9 2.6 8.7 0 11.6M18.4 6.2c-2.6 2.9-2.6 8.7 0 11.6" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
 <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7.5 4h9v5a4.5 4.5 0 0 1-9 0Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 6h-3v1.6a3 3 0 0 0 3 3M16.5 6h3v1.6a3 3 0 0 1-3 3M12 13.6V17M9 20h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
@@ -784,7 +799,8 @@ body.boot .screen>*{animation:none!important;opacity:0}
     </label>
     <div class="field ico" id="fEndDateWrap" style="display:none;margin-top:8px"><svg><use href="#i-cal"/></svg><input type="date" id="fEndDate"></div>
     <div class="lbl">Tipe sesi</div>
-    <div class="seg four" id="fType">
+    <div class="seg five" id="fType">
+      <button data-t="latihan" onclick="pickType('latihan')">Latihan</button>
       <button data-t="mabar" class="on" onclick="pickType('mabar')">Mabar</button>
       <button data-t="sparing" onclick="pickType('sparing')">Sparing</button>
       <button data-t="turnamen" onclick="pickType('turnamen')">Turnamen</button>
@@ -844,8 +860,8 @@ var store = (function(){
 var ADMIN_PIN = '7777';
 /* Firebase DB URL — isi supaya link polos sync untuk semua pengunjung */
 var EMBEDDED_CLOUD_DB = 'https://padelteroos-cal-default-rtdb.asia-southeast1.firebasedatabase.app';
-var TYPE = {mabar:'Latihan', sparing:'Sparing', turnamen:'Turnamen', healing:'Healing', battle:'Sparing'};
-var TYPE_ICON = {mabar:'i-ball', sparing:'i-users', turnamen:'i-trophy', healing:'i-heal', battle:'i-users'};
+var TYPE = {latihan:'Latihan', mabar:'Mabar', sparing:'Sparing', turnamen:'Turnamen', healing:'Healing', battle:'Sparing'};
+var TYPE_ICON = {latihan:'i-train', mabar:'i-ball', sparing:'i-users', turnamen:'i-trophy', healing:'i-heal', battle:'i-users'};
 var COLORS = ['#526627','#6c8437','#3c4b1c','#7d8f4a','#455a1f','#b08a58','#3d6f70','#5f7330','#c9694a','#8a4326'];
 var DAY = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
 var DAYL = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -1378,9 +1394,9 @@ function go(s){
 /* ============ HOME ============ */
 function renderHome(){
   var list0 = state.viewMode==='past' ? pastEvents() : upcoming();
-  var c={all:list0.length,mabar:0,sparing:0,turnamen:0,healing:0};
+  var c={all:list0.length,latihan:0,mabar:0,sparing:0,turnamen:0,healing:0};
   list0.forEach(function(e){ var t=e.type==='battle'?'sparing':e.type; if(c[t]!==undefined) c[t]++; });
-  document.getElementById('homeFilters').innerHTML = ['all','mabar','sparing','turnamen','healing'].map(function(k){
+  document.getElementById('homeFilters').innerHTML = ['all','latihan','mabar','sparing','turnamen','healing'].map(function(k){
     return '<button class="pill count'+(state.filter===k?' on':'')+'" data-key="'+k+'" onclick="setFilter(\''+k+'\')">'+
       '<span class="n">'+c[k]+'</span>'+(k==='all'?'Semua':TYPE[k])+'</button>';
   }).join('');
@@ -1518,8 +1534,8 @@ function renderJadwal(){
   document.getElementById('stripLabel').textContent = MON[ref.getMonth()]+' '+ref.getFullYear();
   strip ? renderStrip() : renderMonth();
   var cf=document.getElementById('calFilters');
-  if(cf.children.length!==5){
-    cf.innerHTML = ['all','mabar','sparing','turnamen','healing'].map(function(k){
+  if(cf.children.length!==6){
+    cf.innerHTML = ['all','latihan','mabar','sparing','turnamen','healing'].map(function(k){
       var icon = k==='all' ? 'i-cal' : TYPE_ICON[k];
       return '<button class="pill'+(state.calFilter===k?' on':'')+'" data-key="'+k+'" onclick="setCalFilter(\''+k+'\')">'+
         ic(icon)+(k==='all'?'Semua':TYPE[k])+'</button>';
@@ -1573,8 +1589,8 @@ function renderStrip(){
   if(on) el.scrollLeft = Math.max(on.offsetLeft - 100, 0);
 }
 /* ============ MONTH VIEW (v0.6.0) ============ */
-function typeKey(e){ var t=e&&e.type; if(t==='battle') t='sparing'; return (t==='turnamen'||t==='sparing'||t==='healing')?t:'mabar'; }
-var TK_CLS = {turnamen:'t', sparing:'s', mabar:'m', healing:'h'};
+function typeKey(e){ var t=e&&e.type; if(t==='battle') t='sparing'; return (t==='turnamen'||t==='sparing'||t==='healing'||t==='latihan')?t:'mabar'; }
+var TK_CLS = {turnamen:'t', sparing:'s', mabar:'m', latihan:'l', healing:'h'};
 function cleanTitle(e){ return String((e&&e.title)||'(tanpa judul)').split(' @ ')[0]; }
 function shortVenue(v){ return String(v||'').split(',')[0].trim(); }
 function monthPrefix(y,m){ return y+'-'+pad2(m+1)+'-'; }
@@ -1582,7 +1598,7 @@ function fmtDM(k){ var x=new Date(k+'T00:00:00'); return x.getDate()+' '+MON[x.g
 
 function monthStats(y,m,f){
   var pre=monthPrefix(y,m), dim=new Date(y,m+1,0).getDate();
-  var st={y:y,m:m,dim:dim,sessions:0,types:{mabar:0,sparing:0,turnamen:0,healing:0},days:{},occupied:0,score:0,
+  var st={y:y,m:m,dim:dim,sessions:0,types:{latihan:0,mabar:0,sparing:0,turnamen:0,healing:0},days:{},occupied:0,score:0,
     people:{},peopleN:0,weekday:[0,0,0,0,0,0,0],venues:{},events:[],tourneys:[]};
   state.events.forEach(function(e){
     if(!e || !e.date) return;
@@ -1659,7 +1675,7 @@ function renderMonth(){
     var meter=''; for(var q=1;q<=4;q++) meter += '<i'+(q<=bi.lv?' class="on"':'')+'></i>';
     var mix='';
     if(st.sessions){
-      var order=[['turnamen','t','Turnamen'],['sparing','s','Sparing'],['mabar','m','Latihan'],['healing','h','Healing']];
+      var order=[['turnamen','t','Turnamen'],['sparing','s','Sparing'],['mabar','m','Mabar'],['latihan','l','Latihan'],['healing','h','Healing']];
       mix = '<div class="mh-mix"><div class="mh-bar">'+
         order.filter(function(o){ return st.types[o[0]]>0; }).map(function(o){
           return '<i class="'+o[1]+'" style="flex:'+st.types[o[0]]+'"></i>';
@@ -1755,8 +1771,8 @@ function renderMonth(){
 
     var lg=document.getElementById('calLegend');
     var lgDef=[['all','i-cal','','Semua',st.sessions],['turnamen','i-trophy','t','Turnamen',st.types.turnamen],
-       ['sparing',TYPE_ICON.sparing,'s','Sparing',st.types.sparing],['mabar',TYPE_ICON.mabar,'m','Latihan',st.types.mabar],['healing',TYPE_ICON.healing,'h','Healing',st.types.healing]];
-    if(lg.children.length!==5){
+       ['sparing',TYPE_ICON.sparing,'s','Sparing',st.types.sparing],['mabar',TYPE_ICON.mabar,'m','Mabar',st.types.mabar],['latihan',TYPE_ICON.latihan,'l','Latihan',st.types.latihan],['healing',TYPE_ICON.healing,'h','Healing',st.types.healing]];
+    if(lg.children.length!==6){
       lg.innerHTML = lgDef.map(function(o){
         return '<button data-k="'+o[0]+'" onclick="setCalFilter(\''+o[0]+'\')">'+
           (o[2]?'<i class="'+o[2]+'"></i>':'')+ic(o[1])+o[3]+' <b></b></button>';
