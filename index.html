@@ -171,6 +171,17 @@ h1.head{font-size:38px;line-height:1.06;font-weight:700;letter-spacing:-.03em;ma
 .open svg{width:16px;height:16px;color:#2b3417}
 .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px}
 .stack{display:flex;align-items:center}
+.foot .act{margin-left:auto}
+.prs{display:flex;flex-direction:column;gap:6px;margin-top:12px;padding:10px 12px;border-radius:var(--r-md);background:rgba(255,255,255,.62);border:1px solid var(--line)}
+.prs .pr{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:650;letter-spacing:-.01em;color:var(--ink);line-height:1.3}
+.prs .pr svg{width:15px;height:15px;color:var(--matcha);flex:none}
+.prs .pr.pend{color:var(--ink-mute);font-weight:500}
+.prs .more{font-size:12px;color:var(--ink-mute);font-weight:600;padding-left:23px}
+.wabtn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:12px;padding:12px 16px;border-radius:var(--r-pill);
+  font-size:13.5px;font-weight:700;color:#2b3417;background:rgba(255,255,255,.72);border:1px solid var(--line);box-shadow:var(--sh);
+  transition:background-color .16s ease,box-shadow .14s}
+.wabtn svg{width:18px;height:18px;color:var(--matcha)}
+.wabtn:active{box-shadow:inset 0 2px 7px rgba(47,58,24,.16);background:var(--matcha-wash)}
 .stack .a{width:30px;height:30px;border-radius:var(--r-pill);display:grid;place-items:center;flex:none;
   font-size:10.5px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,.95);margin-left:-9px}
 .stack .a:first-child{margin-left:0}
@@ -535,6 +546,7 @@ textarea.field{min-height:92px;resize:none;line-height:1.5}
 .mleg button i.l{background:linear-gradient(135deg,#6c8437 50%,#a8bd7a 50%)}
 .mrow.l .mb{background:repeating-linear-gradient(135deg,#6c8437 0 7px,#789040 7px 14px)}
 
+.appver{margin:22px 0 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:var(--ink-mute);opacity:.7}
 /* ===== MOTION (v0.7.0) ===== */
 body.boot .screen>*{animation:none!important;opacity:0}
 /* cross-fade: layar lama tetap tampil sambil memudar, jadi tidak ada jeda kosong */
@@ -651,6 +663,7 @@ body.boot .screen>*{animation:none!important;opacity:0}
 <symbol id="i-heal" viewBox="0 0 24 24"><path d="M5 10h11v4.2a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16 11.2h1.3a2.3 2.3 0 0 1 0 4.6H15.6M8.6 3.6c-.9 1 .9 1.8 0 2.8M12.4 3.6c-.9 1 .9 1.8 0 2.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.6 6.2c2.6 2.9 2.6 8.7 0 11.6M18.4 6.2c-2.6 2.9-2.6 8.7 0 11.6" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
 <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7.5 4h9v5a4.5 4.5 0 0 1-9 0Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 6h-3v1.6a3 3 0 0 0 3 3M16.5 6h3v1.6a3 3 0 0 1-3 3M12 13.6V17M9 20h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M4.5 11.2a7.5 7.5 0 0 1 13.3-4.7 7.5 7.5 0 0 1-10.4 10.6L4 18.2l1.2-3.6a7.4 7.4 0 0 1-.7-3.4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.2 9.3c.2 1.9 1.7 3.4 3.7 3.8l1-1.1 1.6.8c-.2.9-1 1.5-1.9 1.4-2.8-.3-5-2.5-5.3-5.3 0-.9.6-1.6 1.5-1.8l.8 1.6-1.4.6Z" fill="currentColor" stroke="none"/></symbol>
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
@@ -682,6 +695,7 @@ body.boot .screen>*{animation:none!important;opacity:0}
       <button data-v="past" onclick="setViewMode('past')">Riwayat</button>
     </div>
     <div class="pills" id="homeFilters"></div>
+    <button class="wabtn" id="waBtn" onclick="copyWA()"><svg><use href="#i-chat"/></svg><span>Salin jadwal buat WhatsApp</span></button>
     <div id="homeList" style="margin-top:14px"></div>
   </section>
 
@@ -773,6 +787,7 @@ body.boot .screen>*{animation:none!important;opacity:0}
       <input type="file" id="uploadJson" accept="application/json,.json" style="display:none" onchange="uploadBackup(event)">
     </div>
     <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.45">Download untuk cadangan, upload untuk restore data sesi & roster.</p>
+      <p class="appver" id="appVer">v0.9.0</p>
   </section>
 
   <!-- FORM -->
@@ -1424,10 +1439,87 @@ function setFilter(k){
   renderHomeList();
 }
 
+function cardPairs(e){
+  var out=[];
+  if(e.groups && e.groups.length){
+    e.groups.forEach(function(g){
+      ((g&&g.entries)||[]).forEach(function(en){
+        var n=entryNames(en); if(!n.length) return;
+        out.push(n.map(function(x){ return x==='TBC'?'Menyusul':x; }).join(' & '));
+      });
+    });
+    return out;
+  }
+  var np=normalizePairs(e);
+  if(np && np.list && np.list.length){
+    return np.list.map(function(pr){ return pr.map(function(x){ return x==='TBC'?'Menyusul':x; }).join(' & '); });
+  }
+  if(e.maxPlayers===2 && e.players && e.players.length===2) return [e.players.join(' & ')];
+  return out;
+}
+function pairBlock(e){
+  var ps=cardPairs(e); if(!ps.length) return '';
+  var shown=ps.slice(0,4), rest=ps.length-shown.length;
+  return '<div class="prs">'+shown.map(function(p){
+    return '<div class="pr'+(p.indexOf('Menyusul')>-1?' pend':'')+'">'+ic('i-users')+'<span>'+p.replace(/&/g,'&amp;')+'</span></div>';
+  }).join('')+(rest>0?'<div class="more">+'+rest+' pasang lagi</div>':'')+'</div>';
+}
+function gcalLink(e){
+  var t=String(e.title||'Sesi').split(' @ ')[0]+(e.subtitle?' - '+e.subtitle:'');
+  var p2=function(n){ return String(n).padStart(2,'0'); };
+  var comp=function(d){ return d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate()); };
+  var dates;
+  if(hasRange(e) || !e.time){
+    var a=new Date(e.date+'T00:00:00'), b=new Date((hasRange(e)?e.endDate:e.date)+'T00:00:00'); b.setDate(b.getDate()+1);
+    if(e.time && hasRange(e)) dates=comp(a)+'T'+e.time.replace(':','')+'00/'+comp(b)+'T000000';
+    else dates=comp(a)+'/'+comp(b);
+  } else {
+    var s0=new Date(e.date+'T'+e.time+':00'), en=new Date(s0.getTime()+(e.dur||2)*3600000);
+    var f=function(d){ return comp(d)+'T'+p2(d.getHours())+p2(d.getMinutes())+'00'; };
+    dates=f(s0)+'/'+f(en);
+  }
+  var det=cardPairs(e); 
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+enc(t)+
+    '&dates='+dates+'&ctz=Asia/Jakarta'+
+    (det.length?'&details='+enc('Partner: '+det.join(', ')):'')+
+    '&location='+enc(e.venue||'');
+}
+function waDay(d){ var x=new Date(d+'T00:00:00'); return DAYL[x.getDay()]+', '+x.getDate()+' '+MON[x.getMonth()].slice(0,3); }
+function enc(v){ return encodeURIComponent(v).replace(/'/g,'%27'); }
+var WA_ICON = {turnamen:'🏆', sparing:'⚔️', mabar:'🎾', latihan:'🏋️', healing:'🌿'};
+function waText(list){
+  var now=new Date();
+  var out=['🎾 *JADWAL padel.teroos KE DEPAN*','Update '+now.getDate()+' '+MON[now.getMonth()].slice(0,3)+' '+now.getFullYear(),''];
+  list.forEach(function(e){
+    var tk=typeKey(e), ps=cardPairs(e);
+    var rng=hasRange(e);
+    out.push((WA_ICON[tk]||'🎾')+' *'+String(e.title||'Sesi').split(' @ ')[0]+'*');
+    if(e.subtitle) out.push('🏷️ '+e.subtitle);
+    out.push('📅 '+(rng ? waDay(e.date)+' s/d '+waDay(e.endDate) : waDay(e.date)));
+    out.push('⏰ '+(e.time ? e.time+' WIB'+(rng?' (mulai)':'') : 'Jam menyusul'));
+    out.push('📍 '+(e.venue||'-'));
+    if(ps.length) out.push('🤝 '+ps.join(' | '));
+    out.push('➕ Add to Google Calendar:');
+    out.push(gcalLink(e));
+    out.push('');
+  });
+  return out.join('\n').replace(/\s+$/,'');
+}
+function copyWA(){
+  var list=upcoming().filter(function(e){ return state.filter==='all' || typeKey(e)===state.filter; });
+  if(!list.length){ toast('Belum ada jadwal buat disalin'); return; }
+  var txt=waText(list);
+  var done=function(){ toast(list.length+' jadwal disalin, tinggal paste di WhatsApp'); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done, function(){ fallbackCopy(txt, done); });
+  } else fallbackCopy(txt, done);
+}
+
 function card(e){
   try{
     var people=peopleList(e), extra=Math.max(people.length-3,0);
-    var stack=people.slice(0,3).map(function(p){ return ava(p); }).join('')+(extra?'<span class="a more">+'+extra+'</span>':'');
+    var pb=pairBlock(e);
+    var stack=pb ? '' : people.slice(0,3).map(function(p){ return ava(p); }).join('')+(extra?'<span class="a more">+'+extra+'</span>':'');
     var timeLine = hasRange(e)
       ? dateRangeLabel(e,fmtS)+(e.time?' · mulai '+e.time:'')
       : (e.time ? fmtS(e.date)+' · '+e.time+(e.dur?'-'+endT(e.time,e.dur):'') : fmtS(e.date)+' · jam menyusul');
@@ -1453,7 +1545,7 @@ function card(e){
       (e.subtitle ? '<p class="sub">'+e.subtitle+'</p>' : '')+
       '<div class="line">'+ic('i-clock')+timeLine+'</div>'+
       '<div class="line">'+ic('i-pin')+(e.venue||'-')+(e.capMeta ? ' · '+e.capMeta : '')+'</div>'+
-      extraLine+
+      extraLine+pb+
       '<div class="foot"><span class="stack">'+stack+'</span>'+right+'</div>'+
     '</button>';
   }catch(err){
