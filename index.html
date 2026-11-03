@@ -177,6 +177,8 @@ h1.head{font-size:38px;line-height:1.06;font-weight:700;letter-spacing:-.03em;ma
 .prs .pr svg{width:15px;height:15px;color:var(--matcha);flex:none}
 .prs .pr.pend{color:var(--ink-mute);font-weight:500}
 .prs .more{font-size:12px;color:var(--ink-mute);font-weight:600;padding-left:23px}
+.btnrow{display:flex;gap:10px;margin-top:12px}
+.btnrow .wabtn{margin-top:0;flex:1;min-width:0;padding:12px 10px;font-size:13px}
 .wabtn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:12px;padding:12px 16px;border-radius:var(--r-pill);
   font-size:13.5px;font-weight:700;color:#2b3417;background:rgba(255,255,255,.72);border:1px solid var(--line);box-shadow:var(--sh);
   transition:background-color .16s ease,box-shadow .14s}
@@ -695,7 +697,10 @@ body.boot .screen>*{animation:none!important;opacity:0}
       <button data-v="past" onclick="setViewMode('past')">Riwayat</button>
     </div>
     <div class="pills" id="homeFilters"></div>
-    <button class="wabtn" id="waBtn" onclick="copyWA()"><svg><use href="#i-chat"/></svg><span>Salin jadwal buat WhatsApp</span></button>
+    <div class="btnrow">
+      <button class="wabtn" id="waBtn" onclick="copyWA()"><svg><use href="#i-chat"/></svg><span>Salin WhatsApp</span></button>
+      <button class="wabtn" id="icsBtn" onclick="downloadICS()"><svg><use href="#i-cal"/></svg><span>Ke Kalender (.ics)</span></button>
+    </div>
     <div id="homeList" style="margin-top:14px"></div>
   </section>
 
@@ -787,7 +792,7 @@ body.boot .screen>*{animation:none!important;opacity:0}
       <input type="file" id="uploadJson" accept="application/json,.json" style="display:none" onchange="uploadBackup(event)">
     </div>
     <p style="font-size:12px;color:var(--ink-mute);margin:8px 0 0;line-height:1.45">Download untuk cadangan, upload untuk restore data sesi & roster.</p>
-      <p class="appver" id="appVer">v0.9.0</p>
+      <p class="appver" id="appVer">v0.9.1</p>
   </section>
 
   <!-- FORM -->
@@ -1504,6 +1509,58 @@ function waText(list){
     out.push('');
   });
   return out.join('\n').replace(/\s+$/,'');
+}
+function icsEsc(v){ return String(v==null?'':v).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n'); }
+function icsFold(l){
+  var out=[], a=Array.from(l);
+  while(a.length>60){ out.push(a.splice(0,60).join('')); }
+  out.push(a.join(''));
+  return out.join('\r\n ');
+}
+function icsUtc(dateStr, timeStr, addDays){
+  var d=new Date(dateStr+'T'+(timeStr||'00:00')+':00+07:00');
+  if(addDays) d=new Date(d.getTime()+addDays*86400000);
+  return d.toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
+}
+function icsDay(dateStr, addDays){
+  var d=new Date(dateStr+'T00:00:00Z'); if(addDays) d=new Date(d.getTime()+addDays*86400000);
+  return d.toISOString().slice(0,10).replace(/-/g,'');
+}
+function icsText(list){
+  var stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
+  var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//padel.teroos//Jadwal Club//ID','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:padel.teroos','X-WR-TIMEZONE:Asia/Jakarta'];
+  list.forEach(function(e){
+    var t=String(e.title||'Sesi').split(' @ ')[0]+(e.subtitle?' - '+e.subtitle:'');
+    var ps=cardPairs(e), rng=hasRange(e), last=rng?e.endDate:e.date;
+    L.push('BEGIN:VEVENT');
+    L.push('UID:'+e.id+'@padel.teroos');
+    L.push('DTSTAMP:'+stamp);
+    if(e.time){
+      L.push('DTSTART:'+icsUtc(e.date,e.time,0));
+      L.push('DTEND:'+(rng ? icsUtc(last,'00:00',1) : new Date(new Date(e.date+'T'+e.time+':00+07:00').getTime()+(e.dur||2)*3600000).toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z')));
+    } else {
+      L.push('DTSTART;VALUE=DATE:'+icsDay(e.date,0));
+      L.push('DTEND;VALUE=DATE:'+icsDay(last,1));
+    }
+    L.push('SUMMARY:'+icsEsc(t));
+    if(e.venue) L.push('LOCATION:'+icsEsc(e.venue));
+    var desc=[]; if(ps.length) desc.push('Partner: '+ps.join(', ')); if(e.rsvp) desc.push('RSVP: '+e.rsvp);
+    if(desc.length) L.push('DESCRIPTION:'+icsEsc(desc.join('\n')));
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.map(icsFold).join('\r\n')+'\r\n';
+}
+function downloadICS(){
+  var list=upcoming().filter(function(e){ return state.filter==='all' || typeKey(e)===state.filter; });
+  if(!list.length){ toast('Belum ada jadwal buat diekspor'); return; }
+  var blob=new Blob([icsText(list)],{type:'text/calendar;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='padel-teroos-jadwal-'+iso(new Date())+'.ics';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+  toast(list.length+' jadwal siap, buka file-nya buat masuk Kalender');
 }
 function copyWA(){
   var list=upcoming().filter(function(e){ return state.filter==='all' || typeKey(e)===state.filter; });
